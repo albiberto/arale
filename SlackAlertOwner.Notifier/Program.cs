@@ -24,7 +24,7 @@ namespace SlackAlertOwner.Notifier
 
                     services.AddSingleton(new JobSchedule(
                         typeof(NotifyJob),
-                        "0/5 * * * * ?")); // run every 5 seconds
+                        "0/20 * * * * ?")); // run every 5 seconds
 
                     services.AddHostedService<QuartzHostedService>();
 
@@ -33,7 +33,7 @@ namespace SlackAlertOwner.Notifier
                         {
                             client.BaseAddress =
                                 new Uri(
-                                    "https://hooks.slack.com/services/");
+                                    "https://hooks.slack.com/services/T1N39MNKG/BRC7YPNSK/");
                         });
                     
                     services.AddSingleton<ISlackHttpClient, SlackHttpClient>();
