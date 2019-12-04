@@ -5,6 +5,7 @@ namespace SlackAlertOwner.Notifier
     using Quartz;
     using Quartz.Impl;
     using Quartz.Spi;
+    using System;
 
     public class Program
     {
@@ -19,15 +20,23 @@ namespace SlackAlertOwner.Notifier
                 {
                     services.AddSingleton<IJobFactory, SingletonJobFactory>();
                     services.AddSingleton<ISchedulerFactory, StdSchedulerFactory>();
-
-                    // Add our job
                     services.AddSingleton<NotifyJob>();
+
                     services.AddSingleton(new JobSchedule(
-                        jobType: typeof(NotifyJob),
-                        cronExpression: "0/5 * * * * ?")); // run every 5 seconds
-                    
+                        typeof(NotifyJob),
+                        "0/5 * * * * ?")); // run every 5 seconds
+
                     services.AddHostedService<QuartzHostedService>();
+
+                    services.AddHttpClient("cazzeggingZoneClient",
+                        client =>
+                        {
+                            client.BaseAddress =
+                                new Uri(
+                                    "https://hooks.slack.com/services/");
+                        });
                     
+                    services.AddSingleton<ISlackHttpClient, SlackHttpClient>();
                 });
     }
 }

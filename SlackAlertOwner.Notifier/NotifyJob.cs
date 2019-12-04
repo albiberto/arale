@@ -6,16 +6,23 @@
 
     public class NotifyJob : IJob
     {
-        private readonly ILogger<NotifyJob> _logger;
-        public NotifyJob(ILogger<NotifyJob> logger)
+        readonly ISlackHttpClient _httpClient;
+        readonly ILogger<NotifyJob> _logger;
+
+        public NotifyJob(ILogger<NotifyJob> logger, ISlackHttpClient httpClient)
         {
             _logger = logger;
+            _httpClient = httpClient;
         }
 
-        public Task Execute(IJobExecutionContext context)
+        public async Task Execute(IJobExecutionContext context)
         {
             _logger.LogInformation("Start NotifyJob");
-            return Task.CompletedTask;
+
+            await _httpClient.Notify();
+            
+            _logger.LogInformation("NotifyJob Completed");
+
         }
     }
 }
