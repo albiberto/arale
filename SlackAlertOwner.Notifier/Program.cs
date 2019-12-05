@@ -1,11 +1,15 @@
 namespace SlackAlertOwner.Notifier
 {
+    using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
+    using Microsoft.Extensions.Options;
+    using Model;
     using Quartz;
     using Quartz.Impl;
     using Quartz.Spi;
     using System;
+    using System.IO;
 
     public class Program
     {
@@ -18,24 +22,28 @@ namespace SlackAlertOwner.Notifier
             Host.CreateDefaultBuilder(args)
                 .ConfigureServices((hostContext, services) =>
                 {
+                    var configBuilder = new ConfigurationBuilder()
+                        .SetBasePath(Directory.GetCurrentDirectory())
+                        .AddJsonFile("appsettings.json", true);
+                    var config = configBuilder.Build();
+
+                    services.Configure<MyOptions>(config.GetSection("Options"));
+
                     services.AddSingleton<IJobFactory, SingletonJobFactory>();
                     services.AddSingleton<ISchedulerFactory, StdSchedulerFactory>();
                     services.AddSingleton<NotifyJob>();
 
-                    services.AddSingleton(new JobSchedule(
-                        typeof(NotifyJob),
-                        "0/20 * * * * ?")); // run every 5 seconds
+                    services.AddSingleton(provider => new JobSchedule(typeof(NotifyJob),
+                        provider.GetService<IOptions<MyOptions>>().Value.CronExpression));
 
                     services.AddHostedService<QuartzHostedService>();
 
                     services.AddHttpClient("cazzeggingZoneClient",
-                        client =>
+                        (provider, client) =>
                         {
-                            client.BaseAddress =
-                                new Uri(
-                                    "https://hooks.slack.com/services/T1N39MNKG/BRC7YPNSK/");
+                            client.BaseAddress = new Uri(provider.GetService<IOptions<MyOptions>>().Value.BaseUrl);
                         });
-                    
+
                     services.AddSingleton<ISlackHttpClient, SlackHttpClient>();
                 });
     }
