@@ -1,31 +1,27 @@
 ﻿namespace SlackAlertOwner.Notifier
 {
-    using System;
+    using Microsoft.Extensions.Options;
+    using Model;
     using System.Net.Http;
     using System.Text.Json;
     using System.Threading.Tasks;
 
     public class SlackHttpClient : ISlackHttpClient
     {
+        readonly string _endpoint;
         readonly IHttpClientFactory _httpClientFactory;
 
-        public SlackHttpClient(IHttpClientFactory httpClientFactory)
+        public SlackHttpClient(IHttpClientFactory httpClientFactory, IOptions<MyOptions> options)
         {
             _httpClientFactory = httpClientFactory;
+            _endpoint = options.Value.EndPoint;
         }
 
-        public async Task Notify()
+        public async Task Notify(object payload)
         {
             using var client = _httpClientFactory.CreateClient("cazzeggingZoneClient");
 
-            var payload = new
-            {
-                text = $"@Alucard is my hero! {DateTime.Now}"
-            };
-
-            var content = new StringContent(JsonSerializer.Serialize(payload));
-
-            await client.PostAsync("m2eVtWuu7p7Ncf5ia5pCLSbr", content);
+            await client.PostAsync(_endpoint, new StringContent(JsonSerializer.Serialize(payload)));
         }
     }
 }

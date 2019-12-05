@@ -4,6 +4,6 @@
 
     public interface ISlackHttpClient
     {
-        Task Notify();
+        Task Notify(object payload);
     }
 }
