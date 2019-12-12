@@ -1,5 +1,8 @@
 namespace SlackAlertOwner.Notifier
 {
+    using Abstract;
+    using Clients;
+    using Jobs;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
@@ -8,6 +11,7 @@ namespace SlackAlertOwner.Notifier
     using Quartz;
     using Quartz.Impl;
     using Quartz.Spi;
+    using Services;
     using System;
     using System.IO;
 
@@ -33,9 +37,7 @@ namespace SlackAlertOwner.Notifier
                     services.AddSingleton<ISchedulerFactory, StdSchedulerFactory>();
                     services.AddSingleton<NotifyJob>();
 
-                    services.AddSingleton(provider => new JobSchedule(typeof(NotifyJob),
-                        provider.GetService<IOptions<MyOptions>>().Value.CronExpression));
-
+                    services.AddSingleton(provider => new JobSchedule(typeof(NotifyJob), provider.GetService<IOptions<MyOptions>>().Value.CronExpression));
                     services.AddHostedService<QuartzHostedService>();
 
                     services.AddHttpClient("cazzeggingZoneClient",
@@ -45,6 +47,10 @@ namespace SlackAlertOwner.Notifier
                         });
 
                     services.AddSingleton<ISlackHttpClient, SlackHttpClient>();
+                    services.AddSingleton<ISpreadSheetService, SpreadSheetService>();
+                    services.AddSingleton<IGoogleAuthenticationService, GoogleAuthenticationService>();
+                    services.AddSingleton<IShiftService, ShiftService>();
+                    services.AddSingleton<ILocalDateService, LocalDateService>();
                 });
     }
 }

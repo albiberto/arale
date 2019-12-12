@@ -1,5 +1,6 @@
-﻿namespace SlackAlertOwner.Notifier
+﻿namespace SlackAlertOwner.Notifier.Clients
 {
+    using Abstract;
     using Microsoft.Extensions.Options;
     using Model;
     using System.Net.Http;
