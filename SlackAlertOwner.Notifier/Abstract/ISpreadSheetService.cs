@@ -2,9 +2,10 @@
 {
     using Model;
     using System.Collections.Generic;
+    using System.Threading.Tasks;
 
     public interface ISpreadSheetService
     {
-        Shift Read();
+        Task<Shift> Read();
     }
 }
