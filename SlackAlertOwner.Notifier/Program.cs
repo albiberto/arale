@@ -40,6 +40,7 @@ namespace SlackAlertOwner.Notifier
                     services.AddSingleton<NotifyJob>();
 
                     services.AddSingleton(provider => new JobSchedule(typeof(NotifyJob), provider.GetService<IOptions<MyOptions>>().Value.CronExpression));
+                    services.AddSingleton(provider => new JobSchedule(typeof(CalendarJob), provider.GetService<IOptions<MyOptions>>().Value.CronExpression));
                     services.AddHostedService<QuartzHostedService>();
 
                     services.AddHttpClient("cazzeggingZoneClient",
