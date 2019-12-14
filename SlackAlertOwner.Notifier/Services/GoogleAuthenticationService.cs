@@ -8,6 +8,7 @@
     using Model;
     using System.IO;
     using System.Threading;
+    using System.Threading.Tasks;
 
     public class GoogleAuthenticationService : IGoogleAuthenticationService
     {
@@ -19,17 +20,17 @@
             _options = options.Value;
         }
 
-        public UserCredential Authenticate()
+        public async Task<UserCredential>  Authenticate()
         {
-            using var stream = new FileStream("credentials.json", FileMode.Open, FileAccess.Read);
+            await using var stream = new FileStream("credentials.json", FileMode.Open, FileAccess.Read);
 
             // The file stores the user's access and refresh tokens, and is created automatically when the authorization flow completes for the first time.
-            return GoogleWebAuthorizationBroker.AuthorizeAsync(
+            return await GoogleWebAuthorizationBroker.AuthorizeAsync(
                 GoogleClientSecrets.Load(stream).Secrets,
                 Scopes,
                 "user",
                 CancellationToken.None,
-                new FileDataStore(_options.CredPath, true)).Result;
+                new FileDataStore(_options.CredPath, true));
         }
     }
 }

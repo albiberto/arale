@@ -2,12 +2,14 @@ namespace SlackAlertOwner.Notifier
 {
     using Abstract;
     using Clients;
+    using Converters;
     using Jobs;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
     using Microsoft.Extensions.Options;
     using Model;
+    using NodaTime;
     using Quartz;
     using Quartz.Impl;
     using Quartz.Spi;
@@ -49,8 +51,7 @@ namespace SlackAlertOwner.Notifier
                     services.AddSingleton<ISlackHttpClient, SlackHttpClient>();
                     services.AddSingleton<ISpreadSheetService, SpreadSheetService>();
                     services.AddSingleton<IGoogleAuthenticationService, GoogleAuthenticationService>();
-                    services.AddSingleton<IShiftService, ShiftService>();
-                    services.AddSingleton<ILocalDateService, LocalDateService>();
+                    services.AddSingleton<ITypeConverter<LocalDate>, LocalDateConverter>();
                 });
     }
 }
