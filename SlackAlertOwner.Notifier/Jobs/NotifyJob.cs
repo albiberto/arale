@@ -5,6 +5,7 @@
     using Quartz;
     using System.Threading.Tasks;
 
+    [DisallowConcurrentExecution]
     public class NotifyJob : IJob
     {
         readonly ILogger<NotifyJob> _logger;
@@ -23,7 +24,8 @@
         {
             _logger.LogInformation("Start NotifyJob");
 
-            var shift = await _spreadSheetService.GetShift();
+            var teamMates = await _spreadSheetService.GetTeamMates();
+            var shift = await _spreadSheetService.GetShift(teamMates);
 
             var request = new
             {
