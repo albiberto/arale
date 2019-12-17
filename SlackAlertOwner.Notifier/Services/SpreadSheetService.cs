@@ -3,8 +3,10 @@
     using Abstract;
     using Google.Apis.Services;
     using Google.Apis.Sheets.v4;
+    using Google.Apis.Sheets.v4.Data;
     using Microsoft.Extensions.Options;
     using Model;
+    using Newtonsoft.Json;
     using NodaTime;
     using System;
     using System.Collections.Generic;
@@ -17,7 +19,6 @@
         readonly ITypeConverter<LocalDate> _converter;
         readonly MyOptions _options;
 
-
         public SpreadSheetService(IGoogleAuthenticationService authenticationService, IOptions<MyOptions> options,
             ITypeConverter<LocalDate> converter)
         {
@@ -26,14 +27,12 @@
             _options = options.Value;
         }
 
-        public async Task<Shift> GetShift()
+        public async Task<Shift> GetShift(IEnumerable<TeamMate> teamMates)
         {
             var service = await GetService();
-
+            
             var shiftsCalendar = (await service.Spreadsheets.Values.Get(_options.SpreadsheetId, _options.CalendarRange)
                 .ExecuteAsync()).Values;
-
-            var teamMates = await GetTeamMates();
 
             var now = LocalDate.FromDateTime(DateTime.Now);
 
@@ -55,27 +54,44 @@
 
         public async Task WriteCalendar()
         {
-            var service = new SheetsService(new BaseClientService.Initializer
-            {
-                HttpClientInitializer = await _authenticationService.Authenticate(),
-                ApplicationName = _options.ApplicationName
-            });
+            var service = await GetService();
 
-            var request = service.Spreadsheets.Values.Get(_options.SpreadsheetId, _options.CalendarRange);
+            // How the input data should be interpreted.
+            // var valueInputOption = (SpreadsheetsResource.ValuesResource.UpdateRequest.ValueInputOptionEnum) 0;  // TODO: Update placeholder value.
+
+            var requestBody = new ValueRange()
+            {
+                Values = new List<IList<object>>()
+                {
+                    new List<object>()
+                    {
+                        "ciao", "alberto"
+                    },
+                    new List<object>()
+                    {
+                        "hello", "roald"
+                    }
+                }
+            };
+
+            var request = service.Spreadsheets.Values.Update(requestBody, _options.SpreadsheetId, _options.CalendarRange);
+            request.ValueInputOption = 0;
+
             var response = await request.ExecuteAsync();
         }
 
-        async Task<SheetsService> GetService()
+        public async Task ClearCalendar()
         {
-            var service = new SheetsService(new BaseClientService.Initializer
-            {
-                HttpClientInitializer = await _authenticationService.Authenticate(),
-                ApplicationName = _options.ApplicationName
-            });
-            return service;
+            var service = await GetService();
+
+            var requestBody = new ClearValuesRequest();
+            var request =
+                service.Spreadsheets.Values.Clear(requestBody, _options.SpreadsheetId, _options.CalendarRange);
+
+            await request.ExecuteAsync();
         }
 
-        async Task<IEnumerable<TeamMate>> GetTeamMates()
+        public async Task<IEnumerable<TeamMate>> GetTeamMates()
         {
             var service = await GetService();
 
@@ -86,5 +102,12 @@
                 Name = teamMate.ElementAt(0) as string
             });
         }
+
+        async Task<SheetsService> GetService() =>
+            new SheetsService(new BaseClientService.Initializer
+            {
+                HttpClientInitializer = await _authenticationService.Authenticate(),
+                ApplicationName = _options.ApplicationName
+            });
     }
 }

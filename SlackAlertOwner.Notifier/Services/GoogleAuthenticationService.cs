@@ -12,7 +12,7 @@
 
     public class GoogleAuthenticationService : IGoogleAuthenticationService
     {
-        static readonly string[] Scopes = {SheetsService.Scope.SpreadsheetsReadonly};
+        static readonly string[] Scopes = {SheetsService.Scope.Spreadsheets};
         readonly MyOptions _options;
 
         public GoogleAuthenticationService(IOptions<MyOptions> options)
@@ -20,7 +20,7 @@
             _options = options.Value;
         }
 
-        public async Task<UserCredential>  Authenticate()
+        public async Task<UserCredential> Authenticate()
         {
             await using var stream = new FileStream("credentials.json", FileMode.Open, FileAccess.Read);
 
@@ -28,7 +28,7 @@
             return await GoogleWebAuthorizationBroker.AuthorizeAsync(
                 GoogleClientSecrets.Load(stream).Secrets,
                 Scopes,
-                "user",
+                _options.ApplicationName,
                 CancellationToken.None,
                 new FileDataStore(_options.CredPath, true));
         }
