@@ -22,7 +22,11 @@
             _logger.LogInformation("Start CalendarJob");
 
             await _spreadSheetService.ClearCalendar();
-            await _spreadSheetService.WriteCalendar();
+
+            var teamMates = await _spreadSheetService.GetTeamMates();
+            var patronDays = await _spreadSheetService.GetPatronDays();
+            
+            await _spreadSheetService.WriteCalendar(teamMates);
             
             _logger.LogInformation("CalendarJob Completed");
         }

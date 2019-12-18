@@ -8,7 +8,8 @@
     {
         Task<Shift> GetShift(IEnumerable<TeamMate> teamMates);
         Task<IEnumerable<TeamMate>> GetTeamMates();
-        Task WriteCalendar();
+        Task WriteCalendar(IEnumerable<TeamMate> teamMates);
         Task ClearCalendar();
+        Task<IEnumerable<PatronDay>> GetPatronDays();
     }
 }

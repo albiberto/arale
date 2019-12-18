@@ -55,6 +55,8 @@ namespace SlackAlertOwner.Notifier
                     services.AddSingleton<ISpreadSheetService, SpreadSheetService>();
                     services.AddSingleton<IGoogleAuthenticationService, GoogleAuthenticationService>();
                     services.AddSingleton<ITypeConverter<LocalDate>, LocalDateConverter>();
+                    services.AddSingleton<IShiftsCalendarService, ShiftsCalendarService>();
+                    services.AddSingleton<ITimeService, TimeService>();
                 });
     }
 }
