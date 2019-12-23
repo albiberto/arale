@@ -52,11 +52,12 @@ namespace SlackAlertOwner.Notifier
                         });
 
                     services.AddSingleton<ISlackHttpClient, SlackHttpClient>();
-                    services.AddSingleton<ISpreadSheetService, SpreadSheetService>();
+                    services.AddSingleton<IAlertOwnerSpreadSheetService, AlertOwnerSpreadSpreadSheetService>();
                     services.AddSingleton<IGoogleAuthenticationService, GoogleAuthenticationService>();
                     services.AddSingleton<ITypeConverter<LocalDate>, LocalDateConverter>();
                     services.AddSingleton<IShiftsCalendarService, ShiftsCalendarService>();
                     services.AddSingleton<ITimeService, TimeService>();
+                    services.AddSingleton<ISpreadSheetService, SpreadSheetService>();
                 });
     }
 }

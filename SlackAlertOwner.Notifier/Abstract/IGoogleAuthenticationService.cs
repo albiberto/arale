@@ -1,10 +1,9 @@
 ﻿namespace SlackAlertOwner.Notifier.Abstract
 {
-    using Google.Apis.Auth.OAuth2;
-    using System.Threading.Tasks;
+    using Google.Apis.Sheets.v4;
 
     public interface IGoogleAuthenticationService
     {
-        public Task<UserCredential> Authenticate();
+        SheetsService GetService();
     }
 }

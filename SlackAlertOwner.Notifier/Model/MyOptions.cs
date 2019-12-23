@@ -13,8 +13,10 @@
         public string TeamMatesRange { get; set; }
         public string Pattern { get; set; }
         public string ApplicationName { get; set; }
-        public string CredPath { get; set; }
-
+        public string Certificate { get; set; }
+        public string Password { get; set; }
+        public string ServiceAccountEmail { get; set; }
+        
         public IEnumerable<TeamMate> TeamMates { get; set; }
     }
 }
