@@ -40,7 +40,7 @@
             var calendar = MonthCalendar(patronDays, teamMates)
                 .Select(day => new List<object>
                 {
-                    $"{day.Schedule}",
+                    _converter.FormatValueAsString(day.Schedule),
                     $"{day.TeamMate.Name}"
                 });
 
