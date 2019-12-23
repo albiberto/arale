@@ -10,22 +10,22 @@
     {
         readonly ILogger<NotifyJob> _logger;
         readonly ISlackHttpClient _slackHttpClient;
-        readonly ISpreadSheetService _spreadSheetService;
+        readonly IAlertOwnerSpreadSheetService _alertOwnerSpreadSheetService;
 
         public NotifyJob(ILogger<NotifyJob> logger, ISlackHttpClient slackHttpClient,
-            ISpreadSheetService spreadSheetService)
+            IAlertOwnerSpreadSheetService alertOwnerSpreadSheetService)
         {
             _logger = logger;
             _slackHttpClient = slackHttpClient;
-            _spreadSheetService = spreadSheetService;
+            _alertOwnerSpreadSheetService = alertOwnerSpreadSheetService;
         }
 
         public async Task Execute(IJobExecutionContext context)
         {
             _logger.LogInformation("Start NotifyJob");
 
-            var teamMates = await _spreadSheetService.GetTeamMates();
-            var shift = await _spreadSheetService.GetShift(teamMates);
+            var teamMates = await _alertOwnerSpreadSheetService.GetTeamMates();
+            var shift = await _alertOwnerSpreadSheetService.GetShift(teamMates);
 
             var request = new
             {
