@@ -1,13 +1,18 @@
 ﻿namespace SlackAlertOwner.Notifier.IoC
 {
+    using Abstract;
+    using Clients;
+    using Converters;
     using Jobs;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Options;
     using Model;
+    using NodaTime;
     using Quartz;
     using Quartz.Impl;
     using Quartz.Spi;
+    using Services;
     using System;
     using System.IO;
 
@@ -44,6 +49,17 @@
                 {
                     client.BaseAddress = new Uri(provider.GetService<IOptions<MyOptions>>().Value.BaseUrl);
                 });
+        }
+
+        public static void AddEnvironment(this IServiceCollection services)
+        {
+            services.AddSingleton<ISlackHttpClient, SlackHttpClient>();
+            services.AddSingleton<IAlertOwnerSpreadSheetService, AlertOwnerSpreadSpreadSheetService>();
+            services.AddSingleton<IGoogleAuthenticationService, GoogleAuthenticationService>();
+            services.AddSingleton<ITypeConverter<LocalDate>, LocalDateConverter>();
+            services.AddSingleton<IShiftsCalendarService, ShiftsCalendarService>();
+            services.AddSingleton<ITimeService, TimeService>();
+            services.AddSingleton<IGoogleSpreadSheetService, GoogleGoogleSpreadSheetService>();
         }
     }
 }

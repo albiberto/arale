@@ -3,6 +3,7 @@
     using Abstract;
     using Microsoft.Extensions.Options;
     using Model;
+    using System.Collections.Generic;
     using System.Net.Http;
     using System.Text.Json;
     using System.Threading.Tasks;
@@ -23,6 +24,14 @@
             using var client = _httpClientFactory.CreateClient("cazzeggingZoneClient");
 
             await client.PostAsync(_endpoint, new StringContent(JsonSerializer.Serialize(payload)));
+        }
+
+        public async Task Notify(IEnumerable<object> payloads)
+        {
+            foreach (var payload in payloads)
+            {
+                await Notify(payload);
+            }
         }
     }
 }

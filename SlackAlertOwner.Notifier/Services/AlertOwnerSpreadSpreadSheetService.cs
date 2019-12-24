@@ -12,21 +12,20 @@
     public class AlertOwnerSpreadSpreadSheetService : IAlertOwnerSpreadSheetService
     {
         readonly ITypeConverter<LocalDate> _converter;
+        readonly IGoogleSpreadSheetService _googleSpreadSheetService;
         readonly MyOptions _options;
-        readonly ISpreadSheetService _spreadSheetService;
 
-        public AlertOwnerSpreadSpreadSheetService(ISpreadSheetService spreadSheetService, IOptions<MyOptions> options,
-            IShiftsCalendarService shiftsCalendarService, ITypeConverter<LocalDate> converter)
+        public AlertOwnerSpreadSpreadSheetService(IGoogleSpreadSheetService googleSpreadSheetService,
+            IOptions<MyOptions> options, ITypeConverter<LocalDate> converter)
         {
-            _spreadSheetService = spreadSheetService;
+            _googleSpreadSheetService = googleSpreadSheetService;
             _converter = converter;
             _options = options.Value;
         }
 
         public async Task<Shift> GetShift(IEnumerable<TeamMate> teamMates)
         {
-            // TODO: Move SpreadSheetId in constructor.
-            var shiftsCalendar = await _spreadSheetService.Get(_options.SpreadsheetId, _options.CalendarRange);
+            var shiftsCalendar = await _googleSpreadSheetService.Get(_options.SpreadsheetId, _options.CalendarRange);
 
             var now = LocalDate.FromDateTime(DateTime.Now);
 
@@ -34,47 +33,43 @@
                     let schedule = _converter.ParseValueFromString(shift.ElementAt(1) as string)
                     let teamMate = $"{shift.ElementAt(0)}"
                     where schedule == now
-                    select new Shift(new TeamMate
-                    {
-                        Id = teamMates.First(tm => tm.Name.Contains(teamMate)).Id,
-                        Name = teamMate
-                    }, schedule)
+                    select new Shift(new TeamMate(teamMates.First(tm => tm.Name.Contains(teamMate)).Id, teamMate, "TS"),
+                        schedule)
                 ).First();
         }
 
         public async Task<IEnumerable<PatronDay>> GetPatronDays()
         {
-            var patronDays = await _spreadSheetService.Get(_options.SpreadsheetId, _options.PatronDaysRange);
+            var patronDays = await _googleSpreadSheetService.Get(_options.SpreadsheetId, _options.PatronDaysRange);
 
-            return patronDays.Values.Select(patronDay =>
+            var result = patronDays.Values.Select(patronDay =>
             {
                 var dayMonth = $"{patronDay.ElementAt(0)}".Split("/");
 
                 return new PatronDay
                 {
-                    Day = new DateTime(DateTime.Now.Year, Convert.ToInt32(dayMonth.ElementAt(0)),
-                        Convert.ToInt32(dayMonth.ElementAt(1))),
+                    Day = new LocalDate(DateTime.Now.Year, Convert.ToInt32(dayMonth.ElementAt(1)),
+                        Convert.ToInt32(dayMonth.ElementAt(0))),
                     CountryCode = $"{patronDay.ElementAt(1)}"
                 };
             });
+
+            return result;
         }
 
-        public async Task<IEnumerable<TeamMate>> GetTeamMates()
-        {
-            var teamMates = await _spreadSheetService.Get(_options.SpreadsheetId, _options.TeamMatesRange);
-
-            return teamMates.Values.Select(teamMate => new TeamMate
-            {
-                Id = teamMate.ElementAt(1) as string,
-                Name = teamMate.ElementAt(0) as string
-            });
-        }
+        public async Task<IEnumerable<TeamMate>> GetTeamMates() =>
+            from teamMate in (await _googleSpreadSheetService.Get(_options.SpreadsheetId, _options.TeamMatesRange))
+                .Values
+            let id = teamMate.ElementAt(1) as string
+            let name = teamMate.ElementAt(0) as string
+            let countryCode = teamMate.ElementAt(2) as string
+            select new TeamMate(id, name, countryCode);
 
         public Task ClearCalendar() =>
-            _spreadSheetService.Clear(_options.SpreadsheetId, _options.CalendarRange);
+            _googleSpreadSheetService.Clear(_options.SpreadsheetId, _options.CalendarRange);
 
         public Task WriteCalendar(IEnumerable<IEnumerable<object>> values) =>
-            _spreadSheetService.Update(_options.SpreadsheetId, _options.CalendarRange,
+            _googleSpreadSheetService.Update(_options.SpreadsheetId, _options.CalendarRange,
                 values);
     }
 }

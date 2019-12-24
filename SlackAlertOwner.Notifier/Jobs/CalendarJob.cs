@@ -15,14 +15,16 @@
     public class CalendarJob : IJob
     {
         readonly IAlertOwnerSpreadSheetService _alertOwnerSpreadSheetService;
+        readonly ISlackHttpClient _httpClient;
         readonly ILogger<NotifyJob> _logger;
         readonly ITimeService _timeService;
         readonly ITypeConverter<LocalDate> _converter;
 
-        public CalendarJob(IAlertOwnerSpreadSheetService alertOwnerSpreadSheetService, ITimeService timeService, ITypeConverter<LocalDate> converter,
+        public CalendarJob(IAlertOwnerSpreadSheetService alertOwnerSpreadSheetService, ISlackHttpClient httpClient, ITimeService timeService, ITypeConverter<LocalDate> converter,
             ILogger<NotifyJob> logger)
         {
             _alertOwnerSpreadSheetService = alertOwnerSpreadSheetService;
+            _httpClient = httpClient;
             _timeService = timeService;
             _converter = converter;
             _logger = logger;
@@ -37,14 +39,16 @@
             var teamMates = await _alertOwnerSpreadSheetService.GetTeamMates();
             var patronDays = await _alertOwnerSpreadSheetService.GetPatronDays();
 
-            var calendar = MonthCalendar(patronDays, teamMates)
-                .Select(day => new List<object>
-                {
-                    _converter.FormatValueAsString(day.Schedule),
-                    $"{day.TeamMate.Name}"
-                });
+            var calendar = MonthCalendar(patronDays, teamMates).ToList();
 
-            await _alertOwnerSpreadSheetService.WriteCalendar(calendar);
+            await _alertOwnerSpreadSheetService.WriteCalendar(calendar.Select(day => new List<object>
+            {
+                _converter.FormatValueAsString(day.Schedule),
+                $"{day.TeamMate.Name}"
+            }));
+
+            await _httpClient.Notify("Ciao <!channel> e' uscito il nuovo calendario dei turni:");
+            await _httpClient.Notify(calendar.Select(shift => $"{shift.Schedule} - {shift.TeamMate.Id}"));
 
             _logger.LogInformation("CalendarJob Completed");
         }
@@ -67,10 +71,43 @@
                 .Select(firstDay.PlusDays)
                 .Where(IsWorkDay);
 
-            var shifts = days.Zip(Forever(teamMates), (day, mate) => new Shift(mate, day));
+            var shifts = days.Zip(Forever(teamMates), (day, mate) => new Shift(mate, day)).ToList();
 
-            // todo: check patron days.
-            return shifts;
+            var monthCalendar = shifts.ToList();
+            var patrons = patronDays.ToList();
+            
+            Switch(monthCalendar, patrons);
+            
+            return monthCalendar;
+        }
+
+        void Switch(IReadOnlyCollection<Shift> shifts, IReadOnlyCollection<PatronDay> patronDays)
+        {
+            IEnumerable<Shift> GetShiftToBeSwitch() =>
+                from patron in patronDays.Where(day => day.Day.Month == _timeService.Now.Month)
+                from shift in shifts
+                where shift.Schedule == patron.Day && shift.TeamMate.CountryCode == patron.CountryCode
+                select shift;
+
+            while (GetShiftToBeSwitch().Any())
+            {
+                var shiftToBeSwitch = GetShiftToBeSwitch().First();
+
+                var candidates=
+                    shifts.Where(shift => shift.TeamMate.CountryCode != shiftToBeSwitch.TeamMate.CountryCode).ToList();
+                
+                var randomTeamMateIndex = new Random().Next(0, candidates.Count() - 1);
+                
+                var candidateShift = candidates.Skip(randomTeamMateIndex).Take(1).First();
+
+                var temp = candidateShift.TeamMate.Clone() as TeamMate;
+                
+                var firstSwitch = shifts.First(s => s.Schedule == candidateShift.Schedule);
+                firstSwitch.TeamMate = shiftToBeSwitch.TeamMate;
+
+                var secondSwitch = shifts.First(s => s.Schedule == shiftToBeSwitch.Schedule);
+                secondSwitch.TeamMate = temp;
+            };
         }
 
         static IEnumerable<T> Forever<T>(IEnumerable<T> source)
