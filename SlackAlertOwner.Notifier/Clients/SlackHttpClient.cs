@@ -28,10 +28,7 @@
 
         public async Task Notify(IEnumerable<object> payloads)
         {
-            foreach (var payload in payloads)
-            {
-                await Notify(payload);
-            }
+            foreach (var payload in payloads) await Notify(payload);
         }
     }
 }
