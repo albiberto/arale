@@ -34,9 +34,9 @@
             services.AddSingleton<ISchedulerFactory, StdSchedulerFactory>();
 
             // services.AddSingleton<NotifyJob>();
-            // services.AddSingleton(provider => new JobSchedule(typeof(NotifyJob), 
-            //         provider.GetService<IOptions<MyOptions>>().Value.CronExpression));
-            
+            // services.AddSingleton(provider => new JobSchedule(typeof(NotifyJob),
+            //     provider.GetService<IOptions<MyOptions>>().Value.CronExpression));
+
             services.AddSingleton<CalendarJob>();
             services.AddSingleton(provider => new JobSchedule(typeof(CalendarJob),
                 provider.GetService<IOptions<MyOptions>>().Value.CronExpression));
@@ -54,12 +54,11 @@
         public static void AddEnvironment(this IServiceCollection services)
         {
             services.AddSingleton<ISlackHttpClient, SlackHttpClient>();
-            services.AddSingleton<IAlertOwnerSpreadSheetService, AlertOwnerSpreadSpreadSheetService>();
-            services.AddSingleton<IGoogleAuthenticationService, GoogleAuthenticationService>();
+            services.AddSingleton<IAlertOwnerSpreadServiceService, AlertOwnerSpreadSpreadSheetServiceService>();
+            services.AddSingleton<IAuthenticationService, AuthenticationService>();
             services.AddSingleton<ITypeConverter<LocalDate>, LocalDateConverter>();
-            services.AddSingleton<IShiftsCalendarService, ShiftsCalendarService>();
             services.AddSingleton<ITimeService, TimeService>();
-            services.AddSingleton<IGoogleSpreadSheetService, GoogleGoogleSpreadSheetService>();
+            services.AddSingleton<IGoogleSpreadSheetService, SpreadSheetClient>();
         }
     }
 }

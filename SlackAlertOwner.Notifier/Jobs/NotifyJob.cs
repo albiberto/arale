@@ -2,37 +2,46 @@
 {
     using Abstract;
     using Microsoft.Extensions.Logging;
+    using NodaTime;
     using Quartz;
+    using System.Collections.Generic;
     using System.Threading.Tasks;
 
     [DisallowConcurrentExecution]
     public class NotifyJob : IJob
     {
+        readonly IAlertOwnerSpreadServiceService _alertOwnerSpreadServiceService;
+        readonly ITypeConverter<LocalDate> _converter;
         readonly ILogger<NotifyJob> _logger;
         readonly ISlackHttpClient _slackHttpClient;
-        readonly IAlertOwnerSpreadSheetService _alertOwnerSpreadSheetService;
 
-        public NotifyJob(ILogger<NotifyJob> logger, ISlackHttpClient slackHttpClient,
-            IAlertOwnerSpreadSheetService alertOwnerSpreadSheetService)
+        public NotifyJob(
+            ISlackHttpClient slackHttpClient,
+            IAlertOwnerSpreadServiceService alertOwnerSpreadServiceService,
+            ITypeConverter<LocalDate> converter,
+            ILogger<NotifyJob> logger 
+            )
         {
-            _logger = logger;
             _slackHttpClient = slackHttpClient;
-            _alertOwnerSpreadSheetService = alertOwnerSpreadSheetService;
+            _alertOwnerSpreadServiceService = alertOwnerSpreadServiceService;
+            _converter = converter;
+            _logger = logger;
         }
 
         public async Task Execute(IJobExecutionContext context)
         {
             _logger.LogInformation("Start NotifyJob");
 
-            var teamMates = await _alertOwnerSpreadSheetService.GetTeamMates();
-            var shift = await _alertOwnerSpreadSheetService.GetShift(teamMates);
+            var teamMates = await _alertOwnerSpreadServiceService.GetTeamMates();
+            var (today, tomorrow) = await _alertOwnerSpreadServiceService.GetShift(teamMates);
 
-            var request = new
+            var requests = new List<string>
             {
-                text = $"Ciao <@{shift.TeamMate.Id}> oggi e' il {shift.Schedule.ToString()} ed e' tuo turno."
+                $"Ciao <@{tomorrow.TeamMate.Id}> domani e' il {tomorrow.Schedule.ToString()} e sara' il tuo turno.",
+                $"Ciao <@{today.TeamMate.Id}> oggi e' il {today.Schedule.ToString()} ed e' tuo turno."
             };
 
-            await _slackHttpClient.Notify(request);
+            await _slackHttpClient.Notify(requests);
 
             _logger.LogInformation("NotifyJob Completed");
         }

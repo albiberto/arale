@@ -19,19 +19,18 @@
             _endpoint = options.Value.EndPoint;
         }
 
-        public async Task Notify(object payload)
+        public async Task Notify(string payload)
         {
             using var client = _httpClientFactory.CreateClient("cazzeggingZoneClient");
 
-            await client.PostAsync(_endpoint, new StringContent(JsonSerializer.Serialize(payload)));
+            await client.PostAsync(_endpoint, new StringContent(JsonSerializer.Serialize(BuildRequest(payload))));
         }
 
-        public async Task Notify(IEnumerable<object> payloads)
+        public async Task Notify(IEnumerable<string> payloads)
         {
-            foreach (var payload in payloads)
-            {
-                await Notify(payload);
-            }
+            foreach (var payload in payloads) await Notify(payload);
         }
+
+        static object BuildRequest(string text) => new {text};
     }
 }

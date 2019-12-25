@@ -14,16 +14,17 @@
     [DisallowConcurrentExecution]
     public class CalendarJob : IJob
     {
-        readonly IAlertOwnerSpreadSheetService _alertOwnerSpreadSheetService;
+        readonly IAlertOwnerSpreadServiceService _alertOwnerSpreadServiceService;
+        readonly ITypeConverter<LocalDate> _converter;
         readonly ISlackHttpClient _httpClient;
         readonly ILogger<NotifyJob> _logger;
         readonly ITimeService _timeService;
-        readonly ITypeConverter<LocalDate> _converter;
 
-        public CalendarJob(IAlertOwnerSpreadSheetService alertOwnerSpreadSheetService, ISlackHttpClient httpClient, ITimeService timeService, ITypeConverter<LocalDate> converter,
+        public CalendarJob(IAlertOwnerSpreadServiceService alertOwnerSpreadServiceService, ISlackHttpClient httpClient,
+            ITimeService timeService, ITypeConverter<LocalDate> converter,
             ILogger<NotifyJob> logger)
         {
-            _alertOwnerSpreadSheetService = alertOwnerSpreadSheetService;
+            _alertOwnerSpreadServiceService = alertOwnerSpreadServiceService;
             _httpClient = httpClient;
             _timeService = timeService;
             _converter = converter;
@@ -34,21 +35,22 @@
         {
             _logger.LogInformation("Start CalendarJob");
 
-            await _alertOwnerSpreadSheetService.ClearCalendar();
+            await _alertOwnerSpreadServiceService.ClearCalendar();
 
-            var teamMates = await _alertOwnerSpreadSheetService.GetTeamMates();
-            var patronDays = await _alertOwnerSpreadSheetService.GetPatronDays();
+            var teamMates = await _alertOwnerSpreadServiceService.GetTeamMates();
+            var patronDays = await _alertOwnerSpreadServiceService.GetPatronDays();
 
             var calendar = MonthCalendar(patronDays, teamMates).ToList();
 
-            await _alertOwnerSpreadSheetService.WriteCalendar(calendar.Select(day => new List<object>
+            await _alertOwnerSpreadServiceService.WriteCalendar(calendar.Select(day => new List<object>
             {
                 _converter.FormatValueAsString(day.Schedule),
                 $"{day.TeamMate.Name}"
             }));
 
             await _httpClient.Notify("Ciao <!channel> e' uscito il nuovo calendario dei turni:");
-            await _httpClient.Notify(calendar.Select(shift => $"{shift.Schedule} - {shift.TeamMate.Id}"));
+            await _httpClient.Notify(calendar.Select(shift =>
+                $"{_converter.FormatValueAsString(shift.Schedule)} - {shift.TeamMate.Name}"));
 
             _logger.LogInformation("CalendarJob Completed");
         }
@@ -75,9 +77,9 @@
 
             var monthCalendar = shifts.ToList();
             var patrons = patronDays.ToList();
-            
+
             Switch(monthCalendar, patrons);
-            
+
             return monthCalendar;
         }
 
@@ -93,21 +95,23 @@
             {
                 var shiftToBeSwitch = GetShiftToBeSwitch().First();
 
-                var candidates=
+                var candidates =
                     shifts.Where(shift => shift.TeamMate.CountryCode != shiftToBeSwitch.TeamMate.CountryCode).ToList();
-                
+
                 var randomTeamMateIndex = new Random().Next(0, candidates.Count() - 1);
-                
+
                 var candidateShift = candidates.Skip(randomTeamMateIndex).Take(1).First();
 
                 var temp = candidateShift.TeamMate.Clone() as TeamMate;
-                
+
                 var firstSwitch = shifts.First(s => s.Schedule == candidateShift.Schedule);
                 firstSwitch.TeamMate = shiftToBeSwitch.TeamMate;
 
                 var secondSwitch = shifts.First(s => s.Schedule == shiftToBeSwitch.Schedule);
                 secondSwitch.TeamMate = temp;
-            };
+            }
+
+            ;
         }
 
         static IEnumerable<T> Forever<T>(IEnumerable<T> source)
