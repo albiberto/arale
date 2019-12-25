@@ -5,7 +5,7 @@
     using System.Collections.Generic;
     using System.Threading.Tasks;
 
-    public interface IAlertOwnerService
+    public interface IAlertOwnerSpreadServiceService
     {
         Task<(Shift today, Shift tomorrow)> GetShift(IEnumerable<TeamMate> teamMates);
         Task<IEnumerable<TeamMate>> GetTeamMates();

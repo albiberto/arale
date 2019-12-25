@@ -9,13 +9,13 @@
     using System.Linq;
     using System.Threading.Tasks;
 
-    public class AlertOwnerService : IAlertOwnerService
+    public class AlertOwnerSpreadSpreadSheetServiceService : IAlertOwnerSpreadServiceService
     {
         readonly ITypeConverter<LocalDate> _converter;
         readonly IGoogleSpreadSheetService _googleSpreadSheetService;
         readonly MyOptions _options;
 
-        public AlertOwnerService(IGoogleSpreadSheetService googleSpreadSheetService,
+        public AlertOwnerSpreadSpreadSheetServiceService(IGoogleSpreadSheetService googleSpreadSheetService,
             IOptions<MyOptions> options, ITypeConverter<LocalDate> converter)
         {
             _googleSpreadSheetService = googleSpreadSheetService;
