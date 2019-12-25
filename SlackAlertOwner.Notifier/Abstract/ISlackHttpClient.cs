@@ -5,7 +5,7 @@
 
     public interface ISlackHttpClient
     {
-        Task Notify(object payload);
-        Task Notify(IEnumerable<object> payload);
+        Task Notify(string payload);
+        Task Notify(IEnumerable<string> payload);
     }
 }

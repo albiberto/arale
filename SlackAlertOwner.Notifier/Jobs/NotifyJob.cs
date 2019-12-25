@@ -2,7 +2,7 @@
 {
     using Abstract;
     using Microsoft.Extensions.Logging;
-    using Model;
+    using NodaTime;
     using Quartz;
     using System.Collections.Generic;
     using System.Threading.Tasks;
@@ -10,47 +10,38 @@
     [DisallowConcurrentExecution]
     public class NotifyJob : IJob
     {
+        readonly IAlertOwnerSpreadServiceService _alertOwnerSpreadServiceService;
+        readonly ITypeConverter<LocalDate> _converter;
         readonly ILogger<NotifyJob> _logger;
         readonly ISlackHttpClient _slackHttpClient;
-        readonly IAlertOwnerService _alertOwnerService;
 
-        public NotifyJob(ILogger<NotifyJob> logger, ISlackHttpClient slackHttpClient,
-            IAlertOwnerService alertOwnerService)
+        public NotifyJob(
+            ISlackHttpClient slackHttpClient,
+            IAlertOwnerSpreadServiceService alertOwnerSpreadServiceService,
+            ITypeConverter<LocalDate> converter,
+            ILogger<NotifyJob> logger 
+            )
         {
-            _logger = logger;
             _slackHttpClient = slackHttpClient;
-            _alertOwnerService = alertOwnerService;
+            _alertOwnerSpreadServiceService = alertOwnerSpreadServiceService;
+            _converter = converter;
+            _logger = logger;
         }
 
         public async Task Execute(IJobExecutionContext context)
         {
-            static object BuildRequest(string text)
-            {
-                var request1 = new
-                {
-                    text = text
-                };
-                return request1;
-            }
-
             _logger.LogInformation("Start NotifyJob");
 
-            var teamMates = await _alertOwnerService.GetTeamMates();
-            var (today, tomorrow) = await _alertOwnerService.GetShift(teamMates);
+            var teamMates = await _alertOwnerSpreadServiceService.GetTeamMates();
+            var (today, tomorrow) = await _alertOwnerSpreadServiceService.GetShift(teamMates);
 
-
-            var request1 =
-                BuildRequest($"Ciao <@{today.TeamMate.Id}> oggi e' il {today.Schedule.ToString()} ed e' tuo turno.");
-            var request2 =
-                BuildRequest(
-                    $"Ciao <@{tomorrow.TeamMate.Id}> domani e' il {tomorrow.Schedule.ToString()} e sara' il tuo turno.");
-
-            var requests = new List<object>
+            var requests = new List<string>
             {
-                request1, request2
+                $"Ciao <@{tomorrow.TeamMate.Id}> domani e' il {tomorrow.Schedule.ToString()} e sara' il tuo turno.",
+                $"Ciao <@{today.TeamMate.Id}> oggi e' il {today.Schedule.ToString()} ed e' tuo turno."
             };
 
-        await _slackHttpClient.Notify(requests);
+            await _slackHttpClient.Notify(requests);
 
             _logger.LogInformation("NotifyJob Completed");
         }
