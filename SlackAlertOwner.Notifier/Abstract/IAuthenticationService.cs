@@ -2,7 +2,7 @@
 {
     using Google.Apis.Sheets.v4;
 
-    public interface IGoogleAuthenticationService
+    public interface IAuthenticationService
     {
         SheetsService GetService();
     }

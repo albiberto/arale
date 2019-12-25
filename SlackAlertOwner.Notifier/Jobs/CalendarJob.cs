@@ -14,16 +14,16 @@
     [DisallowConcurrentExecution]
     public class CalendarJob : IJob
     {
-        readonly IAlertOwnerSpreadSheetService _alertOwnerSpreadSheetService;
+        readonly IAlertOwnerService _alertOwnerService;
         readonly ISlackHttpClient _httpClient;
         readonly ILogger<NotifyJob> _logger;
         readonly ITimeService _timeService;
         readonly ITypeConverter<LocalDate> _converter;
 
-        public CalendarJob(IAlertOwnerSpreadSheetService alertOwnerSpreadSheetService, ISlackHttpClient httpClient, ITimeService timeService, ITypeConverter<LocalDate> converter,
+        public CalendarJob(IAlertOwnerService alertOwnerService, ISlackHttpClient httpClient, ITimeService timeService, ITypeConverter<LocalDate> converter,
             ILogger<NotifyJob> logger)
         {
-            _alertOwnerSpreadSheetService = alertOwnerSpreadSheetService;
+            _alertOwnerService = alertOwnerService;
             _httpClient = httpClient;
             _timeService = timeService;
             _converter = converter;
@@ -34,14 +34,14 @@
         {
             _logger.LogInformation("Start CalendarJob");
 
-            await _alertOwnerSpreadSheetService.ClearCalendar();
+            await _alertOwnerService.ClearCalendar();
 
-            var teamMates = await _alertOwnerSpreadSheetService.GetTeamMates();
-            var patronDays = await _alertOwnerSpreadSheetService.GetPatronDays();
+            var teamMates = await _alertOwnerService.GetTeamMates();
+            var patronDays = await _alertOwnerService.GetPatronDays();
 
             var calendar = MonthCalendar(patronDays, teamMates).ToList();
 
-            await _alertOwnerSpreadSheetService.WriteCalendar(calendar.Select(day => new List<object>
+            await _alertOwnerService.WriteCalendar(calendar.Select(day => new List<object>
             {
                 _converter.FormatValueAsString(day.Schedule),
                 $"{day.TeamMate.Name}"

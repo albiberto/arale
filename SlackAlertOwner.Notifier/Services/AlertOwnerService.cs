@@ -9,13 +9,13 @@
     using System.Linq;
     using System.Threading.Tasks;
 
-    public class AlertOwnerSpreadSpreadSheetService : IAlertOwnerSpreadSheetService
+    public class AlertOwnerService : IAlertOwnerService
     {
         readonly ITypeConverter<LocalDate> _converter;
         readonly IGoogleSpreadSheetService _googleSpreadSheetService;
         readonly MyOptions _options;
 
-        public AlertOwnerSpreadSpreadSheetService(IGoogleSpreadSheetService googleSpreadSheetService,
+        public AlertOwnerService(IGoogleSpreadSheetService googleSpreadSheetService,
             IOptions<MyOptions> options, ITypeConverter<LocalDate> converter)
         {
             _googleSpreadSheetService = googleSpreadSheetService;
@@ -23,19 +23,25 @@
             _options = options.Value;
         }
 
-        public async Task<Shift> GetShift(IEnumerable<TeamMate> teamMates)
+        public async Task<(Shift today, Shift tomorrow)> GetShift(IEnumerable<TeamMate> teamMates)
         {
             var shiftsCalendar = await _googleSpreadSheetService.Get(_options.SpreadsheetId, _options.CalendarRange);
 
             var now = LocalDate.FromDateTime(DateTime.Now);
 
-            return (from shift in shiftsCalendar.Values
-                    let schedule = _converter.ParseValueFromString(shift.ElementAt(1) as string)
-                    let teamMate = $"{shift.ElementAt(0)}"
-                    where schedule == now
-                    select new Shift(new TeamMate(teamMates.First(tm => tm.Name.Contains(teamMate)).Id, teamMate, "TS"),
+            var result = (from shift in shiftsCalendar.Values
+                    let schedule = _converter.ParseValueFromString(shift.ElementAt(0) as string)
+                    let teamMate = $"{shift.ElementAt(1)}"
+                    where schedule == now || schedule == now.PlusDays(1)
+                    orderby schedule
+                    select new Shift(new TeamMate(teamMates.First(tm => tm.Name.Contains(teamMate)).Id, teamMate, null),
                         schedule)
-                ).First();
+                ).ToList();
+
+            var today = result.FirstOrDefault();
+            var tomorrow = result.Skip(1).FirstOrDefault();
+
+            return (today, tomorrow);
         }
 
         public async Task<IEnumerable<PatronDay>> GetPatronDays()

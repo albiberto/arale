@@ -8,11 +8,11 @@
     using Model;
     using System.Security.Cryptography.X509Certificates;
 
-    public class GoogleAuthenticationService : IGoogleAuthenticationService
+    public class AuthenticationService : IAuthenticationService
     {
         readonly MyOptions _options;
 
-        public GoogleAuthenticationService(IOptions<MyOptions> options)
+        public AuthenticationService(IOptions<MyOptions> options)
         {
             _options = options.Value;
         }
@@ -30,7 +30,6 @@
 
 
             return new SheetsService(new BaseClientService.Initializer
-
             {
                 HttpClientInitializer = credential,
                 ApplicationName = _options.ApplicationName
