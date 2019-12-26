@@ -7,11 +7,11 @@
     using System.Linq;
     using System.Threading.Tasks;
 
-    public class SpreadSheetClient : IGoogleSpreadSheetService
+    public class GoogleSpreadSheetClient : IGoogleSpreadSheetClient
     {
         readonly SheetsService _service;
 
-        public SpreadSheetClient(IAuthenticationService authService)
+        public GoogleSpreadSheetClient(IAuthenticationService authService)
         {
             _service = authService.GetService();
         }

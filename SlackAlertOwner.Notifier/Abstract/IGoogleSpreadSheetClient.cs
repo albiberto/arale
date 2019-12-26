@@ -4,7 +4,7 @@
     using System.Collections.Generic;
     using System.Threading.Tasks;
 
-    public interface IGoogleSpreadSheetService
+    public interface IGoogleSpreadSheetClient
     {
         Task<ValueRange> Get(string id, string range);
         Task<ClearValuesResponse> Clear(string id, string range, ClearValuesRequest requestBody = default);

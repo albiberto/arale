@@ -9,25 +9,27 @@
     using System.Linq;
     using System.Threading.Tasks;
 
-    public class AlertOwnerSpreadSpreadSheetServiceService : IAlertOwnerSpreadServiceService
+    public class AlertOwnerSpreadSheetService : IAlertOwnerSpreadServiceService
     {
         readonly ITypeConverter<LocalDate> _converter;
-        readonly IGoogleSpreadSheetService _googleSpreadSheetService;
+        readonly IGoogleSpreadSheetClient _googleSpreadSheetClient;
         readonly MyOptions _options;
+        readonly ITimeService _timeService;
 
-        public AlertOwnerSpreadSpreadSheetServiceService(IGoogleSpreadSheetService googleSpreadSheetService,
-            IOptions<MyOptions> options, ITypeConverter<LocalDate> converter)
+        public AlertOwnerSpreadSheetService(IGoogleSpreadSheetClient googleSpreadSheetClient,
+            ITypeConverter<LocalDate> converter, ITimeService timeService, IOptions<MyOptions> options)
         {
-            _googleSpreadSheetService = googleSpreadSheetService;
+            _googleSpreadSheetClient = googleSpreadSheetClient;
+            _timeService = timeService;
             _converter = converter;
             _options = options.Value;
         }
 
         public async Task<(Shift today, Shift tomorrow)> GetShift(IEnumerable<TeamMate> teamMates)
         {
-            var shiftsCalendar = await _googleSpreadSheetService.Get(_options.SpreadsheetId, _options.CalendarRange);
+            var shiftsCalendar = await _googleSpreadSheetClient.Get(_options.SpreadsheetId, _options.CalendarRange);
 
-            var now = LocalDate.FromDateTime(DateTime.Now);
+            var now = _timeService.Now;
 
             var result = (from shift in shiftsCalendar.Values
                     let schedule = _converter.ParseValueFromString(shift.ElementAt(0) as string)
@@ -46,7 +48,7 @@
 
         public async Task<IEnumerable<PatronDay>> GetPatronDays()
         {
-            var patronDays = await _googleSpreadSheetService.Get(_options.SpreadsheetId, _options.PatronDaysRange);
+            var patronDays = await _googleSpreadSheetClient.Get(_options.SpreadsheetId, _options.PatronDaysRange);
 
             var result = patronDays.Values.Select(patronDay =>
             {
@@ -64,7 +66,7 @@
         }
 
         public async Task<IEnumerable<TeamMate>> GetTeamMates() =>
-            from teamMate in (await _googleSpreadSheetService.Get(_options.SpreadsheetId, _options.TeamMatesRange))
+            from teamMate in (await _googleSpreadSheetClient.Get(_options.SpreadsheetId, _options.TeamMatesRange))
                 .Values
             let id = teamMate.ElementAt(1) as string
             let name = teamMate.ElementAt(0) as string
@@ -72,10 +74,10 @@
             select new TeamMate(id, name, countryCode);
 
         public Task ClearCalendar() =>
-            _googleSpreadSheetService.Clear(_options.SpreadsheetId, _options.CalendarRange);
+            _googleSpreadSheetClient.Clear(_options.SpreadsheetId, _options.CalendarRange);
 
         public Task WriteCalendar(IEnumerable<IEnumerable<object>> values) =>
-            _googleSpreadSheetService.Update(_options.SpreadsheetId, _options.CalendarRange,
+            _googleSpreadSheetClient.Update(_options.SpreadsheetId, _options.CalendarRange,
                 values);
     }
 }

@@ -54,11 +54,11 @@
         public static void AddEnvironment(this IServiceCollection services)
         {
             services.AddSingleton<ISlackHttpClient, SlackHttpClient>();
-            services.AddSingleton<IAlertOwnerSpreadServiceService, AlertOwnerSpreadSpreadSheetServiceService>();
+            services.AddSingleton<IAlertOwnerSpreadServiceService, AlertOwnerSpreadSheetService>();
             services.AddSingleton<IAuthenticationService, AuthenticationService>();
             services.AddSingleton<ITypeConverter<LocalDate>, LocalDateConverter>();
             services.AddSingleton<ITimeService, TimeService>();
-            services.AddSingleton<IGoogleSpreadSheetService, SpreadSheetClient>();
+            services.AddSingleton<IGoogleSpreadSheetClient, GoogleSpreadSheetClient>();
         }
     }
 }
