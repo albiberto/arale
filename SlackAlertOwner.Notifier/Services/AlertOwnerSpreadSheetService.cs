@@ -54,12 +54,11 @@
             {
                 var dayMonth = $"{patronDay.ElementAt(0)}".Split("/");
 
-                return new PatronDay
-                {
-                    Day = new LocalDate(DateTime.Now.Year, Convert.ToInt32(dayMonth.ElementAt(1)),
+                return new PatronDay(
+                    new LocalDate(DateTime.Now.Year, Convert.ToInt32(dayMonth.ElementAt(1)),
                         Convert.ToInt32(dayMonth.ElementAt(0))),
-                    CountryCode = $"{patronDay.ElementAt(1)}"
-                };
+                    $"{patronDay.ElementAt(1)}"
+                );
             });
 
             return result;

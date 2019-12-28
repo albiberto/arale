@@ -1,10 +1,16 @@
 ﻿namespace SlackAlertOwner.Notifier.Model
 {
+    using Abstract;
     using NodaTime;
 
-    public class PatronDay
+    public class PatronDay : IDay
     {
-        public LocalDate Day { get; set; }
-        public string CountryCode { get; set; }
+        public PatronDay(LocalDate day, string countryCode)
+        {
+            Day = day;
+            CountryCode = countryCode;
+        }
+        public LocalDate Day { get; }
+        public string CountryCode { get; }
     }
 }
