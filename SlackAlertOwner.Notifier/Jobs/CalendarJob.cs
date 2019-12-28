@@ -17,15 +17,18 @@
         readonly IAlertOwnerSpreadServiceService _alertOwnerSpreadServiceService;
         readonly ITypeConverter<LocalDate> _converter;
         readonly ISlackHttpClient _httpClient;
+        readonly IShiftsService _shiftsService;
         readonly ILogger<NotifyJob> _logger;
         readonly ITimeService _timeService;
 
         public CalendarJob(IAlertOwnerSpreadServiceService alertOwnerSpreadServiceService, ISlackHttpClient httpClient,
+           IShiftsService shiftsService,
             ITimeService timeService, ITypeConverter<LocalDate> converter,
             ILogger<NotifyJob> logger)
         {
             _alertOwnerSpreadServiceService = alertOwnerSpreadServiceService;
             _httpClient = httpClient;
+            _shiftsService = shiftsService;
             _timeService = timeService;
             _converter = converter;
             _logger = logger;
@@ -40,86 +43,22 @@
             var teamMates = await _alertOwnerSpreadServiceService.GetTeamMates();
             var patronDays = await _alertOwnerSpreadServiceService.GetPatronDays();
 
-            var calendar = MonthCalendar(patronDays, teamMates).ToList();
+            var calendar = _shiftsService
+                .AddPatronDays(patronDays)
+                .Build(teamMates)
+                .ToList();
 
             await _alertOwnerSpreadServiceService.WriteCalendar(calendar.Select(day => new List<object>
             {
                 _converter.FormatValueAsString(day.Schedule),
                 $"{day.TeamMate.Name}"
             }));
-
+            
             await _httpClient.Notify("Ciao <!channel> e' uscito il nuovo calendario dei turni:");
             await _httpClient.Notify(calendar.Select(shift =>
                 $"{_converter.FormatValueAsString(shift.Schedule)} - {shift.TeamMate.Name}"));
 
             _logger.LogInformation("CalendarJob Completed");
-        }
-
-        IEnumerable<Shift> MonthCalendar(IEnumerable<PatronDay> patronDays, IEnumerable<TeamMate> teamMates)
-        {
-            var firstDay = _timeService.Now.With(DateAdjusters.StartOfMonth);
-
-            var holidays = DateSystem.GetPublicHoliday(firstDay.Year, CountryCode.IT)
-                .Select(publicHoliday => LocalDate.FromDateTime(publicHoliday.Date))
-                .ToHashSet();
-
-            var monthDaysNumber = DateTime.DaysInMonth(firstDay.Year, firstDay.Month);
-
-            bool IsWorkDay(LocalDate day) =>
-                !holidays.Contains(day) && day.DayOfWeek != IsoDayOfWeek.Sunday &&
-                day.DayOfWeek != IsoDayOfWeek.Saturday;
-
-            var days = Enumerable.Range(0, monthDaysNumber)
-                .Select(firstDay.PlusDays)
-                .Where(IsWorkDay);
-
-            var shifts = days.Zip(Forever(teamMates), (day, mate) => new Shift(mate, day)).ToList();
-
-            var monthCalendar = shifts.ToList();
-            var patrons = patronDays.ToList();
-
-            Switch(monthCalendar, patrons);
-
-            return monthCalendar;
-        }
-
-        void Switch(IReadOnlyCollection<Shift> shifts, IReadOnlyCollection<PatronDay> patronDays)
-        {
-            IEnumerable<Shift> GetShiftToBeSwitch() =>
-                from patron in patronDays.Where(day => day.Day.Month == _timeService.Now.Month)
-                from shift in shifts
-                where shift.Schedule == patron.Day && shift.TeamMate.CountryCode == patron.CountryCode
-                select shift;
-
-            while (GetShiftToBeSwitch().Any())
-            {
-                var shiftToBeSwitch = GetShiftToBeSwitch().First();
-
-                var candidates =
-                    shifts.Where(shift => shift.TeamMate.CountryCode != shiftToBeSwitch.TeamMate.CountryCode).ToList();
-
-                var randomTeamMateIndex = new Random().Next(0, candidates.Count() - 1);
-
-                var candidateShift = candidates.Skip(randomTeamMateIndex).Take(1).First();
-
-                var temp = candidateShift.TeamMate.Clone() as TeamMate;
-
-                var firstSwitch = shifts.First(s => s.Schedule == candidateShift.Schedule);
-                firstSwitch.TeamMate = shiftToBeSwitch.TeamMate;
-
-                var secondSwitch = shifts.First(s => s.Schedule == shiftToBeSwitch.Schedule);
-                secondSwitch.TeamMate = temp;
-            }
-
-            ;
-        }
-
-        static IEnumerable<T> Forever<T>(IEnumerable<T> source)
-        {
-            while (true)
-                // ReSharper disable once PossibleMultipleEnumeration
-                foreach (var item in source)
-                    yield return item;
         }
     }
 }
