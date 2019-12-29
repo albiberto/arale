@@ -1,7 +1,6 @@
 ﻿#nullable enable
 namespace SlackAlertOwner.Tests
 {
-    using Castle.Components.DictionaryAdapter;
     using Google.Apis.Sheets.v4.Data;
     using Microsoft.Extensions.Options;
     using Moq;
@@ -57,6 +56,33 @@ namespace SlackAlertOwner.Tests
         Mock<ITimeService> _timeService;
 
         [Test]
+        public async Task Should_clear_calendar()
+        {
+            _googleSpreadSheetClient
+                .Setup(s =>
+                    s.Clear(
+                        It.Is<string>(id => id == "1"),
+                        It.Is<string>(range => range == "Calendar!A:B"),
+                        It.IsAny<ClearValuesRequest>())
+                )
+                .ReturnsAsync(new ClearValuesResponse
+                {
+                    SpreadsheetId = "1"
+                });
+
+            var sut = new AlertOwnerService(_googleSpreadSheetClient.Object, _converter.Object, _timeService.Object,
+                _options);
+
+            await sut.ClearCalendar();
+
+            _googleSpreadSheetClient.Verify(s => s.Clear(
+                    It.Is<string>(id => id == "1"),
+                    It.Is<string>(range => range == "Calendar!A:B"),
+                    It.IsAny<ClearValuesRequest>()), Times.Once
+            );
+        }
+
+        [Test]
         public async Task Should_return_patronDays()
         {
             _googleSpreadSheetClient
@@ -73,8 +99,9 @@ namespace SlackAlertOwner.Tests
                     }
                 });
 
-            var sut = new AlertOwnerService(_googleSpreadSheetClient.Object, _converter.Object, _timeService.Object, _options);
-            
+            var sut = new AlertOwnerService(_googleSpreadSheetClient.Object, _converter.Object, _timeService.Object,
+                _options);
+
             var actual = (await sut.GetPatronDays()).First();
 
             Assert.AreEqual(new LocalDate(2019, 12, 25).ToString(), actual.Day.ToString());
@@ -125,8 +152,9 @@ namespace SlackAlertOwner.Tests
                 .Returns(new LocalDate(2019, 12, 25))
                 .Returns(new LocalDate(2019, 12, 26));
 
-            var sut = new AlertOwnerService(_googleSpreadSheetClient.Object, _converter.Object, _timeService.Object, _options);
-            
+            var sut = new AlertOwnerService(_googleSpreadSheetClient.Object, _converter.Object, _timeService.Object,
+                _options);
+
             var (today, tomorrow) = await sut.GetShift(teamMates);
 
             Assert.AreEqual(new LocalDate(2019, 12, 25).ToString(), today.Schedule.ToString());
@@ -157,8 +185,9 @@ namespace SlackAlertOwner.Tests
                     }
                 });
 
-            var sut = new AlertOwnerService(_googleSpreadSheetClient.Object, _converter.Object, _timeService.Object, _options);
-            
+            var sut = new AlertOwnerService(_googleSpreadSheetClient.Object, _converter.Object, _timeService.Object,
+                _options);
+
             var actual = (await sut.GetTeamMates()).ToList().First();
 
             Assert.AreEqual("1", actual.Id);
@@ -167,28 +196,41 @@ namespace SlackAlertOwner.Tests
         }
 
         [Test]
-        public async Task Should_clear_calendar()
+        public async Task Should_update_calendar()
         {
             _googleSpreadSheetClient
                 .Setup(s =>
-                    s.Clear(
-                        It.Is<string>(id => id == "1"), 
+                    s.Update(
+                        It.Is<string>(id => id == "1"),
                         It.Is<string>(range => range == "Calendar!A:B"),
-                        It.IsAny<ClearValuesRequest>())
+                        It.Is<IEnumerable<IEnumerable<object>>>(r =>
+                            string.Join(";", r.First()) == "Hulk;IronMan;Thor;SpiderMan"
+                        ))
                 )
-                .ReturnsAsync(new ClearValuesResponse
+                .ReturnsAsync(new UpdateValuesResponse
                 {
                     SpreadsheetId = "1"
                 });
-            
-            var sut = new AlertOwnerService(_googleSpreadSheetClient.Object, _converter.Object, _timeService.Object, _options);
 
-            await sut.ClearCalendar();
+            var sut = new AlertOwnerService(_googleSpreadSheetClient.Object, _converter.Object, _timeService.Object,
+                _options);
 
-            _googleSpreadSheetClient.Verify(s => s.Clear(
-                It.Is<string>(id => id == "1"),
-                It.Is<string>(range => range == "Calendar!A:B"),
-                It.IsAny<ClearValuesRequest>()), Times.Once
+            var request = new List<IEnumerable<object>>
+            {
+                new List<object>
+                {
+                    "Hulk", "IronMan", "Thor", "SpiderMan"
+                }
+            };
+
+            await sut.WriteCalendar(request);
+
+            _googleSpreadSheetClient.Verify(s => s.Update(
+                    It.Is<string>(id => id == "1"),
+                    It.Is<string>(range => range == "Calendar!A:B"),
+                    It.Is<IEnumerable<IEnumerable<object>>>(r =>
+                        string.Join(";", r.First()) == "Hulk;IronMan;Thor;SpiderMan"
+                    )), Times.Once
             );
         }
     }

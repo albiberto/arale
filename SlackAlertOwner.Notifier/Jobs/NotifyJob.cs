@@ -1,9 +1,8 @@
 ﻿namespace SlackAlertOwner.Notifier.Jobs
 {
     using Abstract;
-    using Microsoft.Extensions.Logging;
-    using NodaTime;
     using Quartz;
+    using Services;
     using System.Collections.Generic;
     using System.Threading.Tasks;
 
@@ -11,39 +10,36 @@
     public class NotifyJob : IJob
     {
         readonly IAlertOwnerService _alertOwnerService;
-        readonly ITypeConverter<LocalDate> _converter;
-        readonly ILogger<NotifyJob> _logger;
+        readonly ILogService _logger;
         readonly ISlackHttpClient _slackHttpClient;
 
         public NotifyJob(
             ISlackHttpClient slackHttpClient,
             IAlertOwnerService alertOwnerService,
-            ITypeConverter<LocalDate> converter,
-            ILogger<NotifyJob> logger 
-            )
+            ILogService logger
+        )
         {
             _slackHttpClient = slackHttpClient;
             _alertOwnerService = alertOwnerService;
-            _converter = converter;
             _logger = logger;
         }
 
         public async Task Execute(IJobExecutionContext context)
         {
-            _logger.LogInformation("Start NotifyJob");
+            _logger.Log("Start NotifyJob");
 
             var teamMates = await _alertOwnerService.GetTeamMates();
             var (today, tomorrow) = await _alertOwnerService.GetShift(teamMates);
 
             var requests = new List<string>
             {
-                $"Ciao <@{tomorrow.TeamMate.Id}> domani e' il {tomorrow.Schedule.ToString()} e sara' il tuo turno.",
-                $"Ciao <@{today.TeamMate.Id}> oggi e' il {today.Schedule.ToString()} ed e' tuo turno."
+                MessageService.Today(today.TeamMate),
+                MessageService.Tomorrow(tomorrow.TeamMate)
             };
 
             await _slackHttpClient.Notify(requests);
 
-            _logger.LogInformation("NotifyJob Completed");
+            _logger.Log("NotifyJob Completed");
         }
     }
 }

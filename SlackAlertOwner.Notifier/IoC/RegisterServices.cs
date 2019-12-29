@@ -34,13 +34,14 @@
             services.AddSingleton<IJobFactory, SingletonJobFactory>();
             services.AddSingleton<ISchedulerFactory, StdSchedulerFactory>();
 
-            // services.AddSingleton<NotifyJob>();
-            // services.AddSingleton(provider => new JobSchedule(typeof(NotifyJob),
-            //     provider.Build<IOptions<MyOptions>>().Value.CronExpression));
-
-            services.AddSingleton<CalendarJob>();
-            services.AddSingleton(provider => new JobSchedule(typeof(CalendarJob),
+            services.AddSingleton<NotifyJob>();
+            services.AddSingleton(provider => new JobSchedule(typeof(NotifyJob),
                 provider.GetService<IOptions<MyOptions>>().Value.CronExpression));
+            
+
+            // services.AddSingleton<CalendarJob>();
+            // services.AddSingleton(provider => new JobSchedule(typeof(CalendarJob),
+            //     provider.GetService<IOptions<MyOptions>>().Value.CronExpression));
         }
 
         public static void AddHttpClients(this IServiceCollection services)
@@ -62,6 +63,7 @@
             services.AddSingleton<IGoogleSpreadSheetClient, GoogleSpreadSheetClient>();
             services.AddSingleton<ICalendarService, CalendarService>();
             services.AddSingleton<IRandomIndexService, RandomIndexService>();
+            services.AddSingleton<ILogService, LogService>();
             
             services.AddSingleton<IShiftsService>(provider => new ShiftsService(
                 () => provider.GetService<ICalendarService>().WithoutHolidays().WithoutWeekEnd().Build(),
