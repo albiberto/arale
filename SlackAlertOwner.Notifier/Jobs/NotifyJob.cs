@@ -10,20 +10,20 @@
     [DisallowConcurrentExecution]
     public class NotifyJob : IJob
     {
-        readonly IAlertOwnerSpreadServiceService _alertOwnerSpreadServiceService;
+        readonly IAlertOwnerService _alertOwnerService;
         readonly ITypeConverter<LocalDate> _converter;
         readonly ILogger<NotifyJob> _logger;
         readonly ISlackHttpClient _slackHttpClient;
 
         public NotifyJob(
             ISlackHttpClient slackHttpClient,
-            IAlertOwnerSpreadServiceService alertOwnerSpreadServiceService,
+            IAlertOwnerService alertOwnerService,
             ITypeConverter<LocalDate> converter,
             ILogger<NotifyJob> logger 
             )
         {
             _slackHttpClient = slackHttpClient;
-            _alertOwnerSpreadServiceService = alertOwnerSpreadServiceService;
+            _alertOwnerService = alertOwnerService;
             _converter = converter;
             _logger = logger;
         }
@@ -32,8 +32,8 @@
         {
             _logger.LogInformation("Start NotifyJob");
 
-            var teamMates = await _alertOwnerSpreadServiceService.GetTeamMates();
-            var (today, tomorrow) = await _alertOwnerSpreadServiceService.GetShift(teamMates);
+            var teamMates = await _alertOwnerService.GetTeamMates();
+            var (today, tomorrow) = await _alertOwnerService.GetShift(teamMates);
 
             var requests = new List<string>
             {

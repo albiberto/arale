@@ -14,19 +14,19 @@
     [DisallowConcurrentExecution]
     public class CalendarJob : IJob
     {
-        readonly IAlertOwnerSpreadServiceService _alertOwnerSpreadServiceService;
+        readonly IAlertOwnerService _alertOwnerService;
         readonly ITypeConverter<LocalDate> _converter;
         readonly ISlackHttpClient _httpClient;
         readonly IShiftsService _shiftsService;
         readonly ILogger<NotifyJob> _logger;
         readonly ITimeService _timeService;
 
-        public CalendarJob(IAlertOwnerSpreadServiceService alertOwnerSpreadServiceService, ISlackHttpClient httpClient,
+        public CalendarJob(IAlertOwnerService alertOwnerService, ISlackHttpClient httpClient,
            IShiftsService shiftsService,
             ITimeService timeService, ITypeConverter<LocalDate> converter,
             ILogger<NotifyJob> logger)
         {
-            _alertOwnerSpreadServiceService = alertOwnerSpreadServiceService;
+            _alertOwnerService = alertOwnerService;
             _httpClient = httpClient;
             _shiftsService = shiftsService;
             _timeService = timeService;
@@ -38,17 +38,17 @@
         {
             _logger.LogInformation("Start CalendarJob");
 
-            await _alertOwnerSpreadServiceService.ClearCalendar();
+            await _alertOwnerService.ClearCalendar();
 
-            var teamMates = await _alertOwnerSpreadServiceService.GetTeamMates();
-            var patronDays = await _alertOwnerSpreadServiceService.GetPatronDays();
+            var teamMates = await _alertOwnerService.GetTeamMates();
+            var patronDays = await _alertOwnerService.GetPatronDays();
 
             var calendar = _shiftsService
                 .AddPatronDays(patronDays)
                 .Build(teamMates)
                 .ToList();
 
-            await _alertOwnerSpreadServiceService.WriteCalendar(calendar.Select(day => new List<object>
+            await _alertOwnerService.WriteCalendar(calendar.Select(day => new List<object>
             {
                 _converter.FormatValueAsString(day.Schedule),
                 $"{day.TeamMate.Name}"

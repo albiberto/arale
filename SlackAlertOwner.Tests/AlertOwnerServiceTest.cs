@@ -13,7 +13,7 @@
     using System.Threading.Tasks;
 
     [TestFixture]
-    public class AlertOwnerSpreadSheetServiceTest
+    public class AlertOwnerServiceTest
     {
         [SetUp]
         public void Setup()
@@ -71,7 +71,7 @@
                     }
                 });
 
-            var sut = new AlertOwnerSpreadSheetService(_googleSpreadSheetClient.Object, _converter.Object,
+            var sut = new AlertOwnerService(_googleSpreadSheetClient.Object, _converter.Object,
                 _timeService.Object, _options);
             var actual = (await sut.GetPatronDays()).First();
 
@@ -123,7 +123,7 @@
                 .Returns(new LocalDate(2019, 12, 25))
                 .Returns(new LocalDate(2019, 12, 26));
 
-            var sut = new AlertOwnerSpreadSheetService(_googleSpreadSheetClient.Object, _converter.Object,
+            var sut = new AlertOwnerService(_googleSpreadSheetClient.Object, _converter.Object,
                 _timeService.Object, _options);
             var actual = await sut.GetShift(teamMates);
 
@@ -155,7 +155,7 @@
                     }
                 });
 
-            var sut = new AlertOwnerSpreadSheetService(_googleSpreadSheetClient.Object, _converter.Object,
+            var sut = new AlertOwnerService(_googleSpreadSheetClient.Object, _converter.Object,
                 _timeService.Object, _options);
             var actual = (await sut.GetTeamMates()).ToList().First();
 

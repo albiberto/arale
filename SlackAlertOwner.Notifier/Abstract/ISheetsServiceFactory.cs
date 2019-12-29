@@ -2,8 +2,8 @@
 {
     using Google.Apis.Sheets.v4;
 
-    public interface IAuthenticationService
+    public interface ISheetsServiceFactory
     {
-        SheetsService GetService();
+        SheetsService Build();
     }
 }
