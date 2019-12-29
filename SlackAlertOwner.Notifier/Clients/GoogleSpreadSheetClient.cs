@@ -9,16 +9,16 @@
 
     public class GoogleSpreadSheetClient : IGoogleSpreadSheetClient
     {
-        readonly ISheetsServiceFactory _authServiceFactory;
+        readonly ISheetsServiceFactory _sheetsServiceFactory;
 
-        public GoogleSpreadSheetClient(ISheetsServiceFactory authServiceFactory)
+        public GoogleSpreadSheetClient(ISheetsServiceFactory sheetsServiceFactory)
         {
-            _authServiceFactory = authServiceFactory;
+            _sheetsServiceFactory = sheetsServiceFactory;
         }
 
         public async Task<ValueRange> Get(string id, string range)
         {
-            using var service = _authServiceFactory.Build();
+            using var service = _sheetsServiceFactory.Build();
             var request = service.Spreadsheets.Values.Get(id, range);
 
             return await request.ExecuteAsync();
@@ -28,7 +28,7 @@
         {
             requestBody ??= new ClearValuesRequest();
 
-            using var service = _authServiceFactory.Build();
+            using var service = _sheetsServiceFactory.Build();
             var request = service.Spreadsheets.Values.Clear(requestBody, id, range);
 
             return await request.ExecuteAsync();
@@ -41,7 +41,7 @@
                 Values = values.Select(Enumerable.ToList).ToList<IList<object>>()
             };
 
-            using var service = _authServiceFactory.Build();
+            using var service = _sheetsServiceFactory.Build();
             var request = service.Spreadsheets.Values.Update(requestBody, id, range);
             
             request.ValueInputOption =
