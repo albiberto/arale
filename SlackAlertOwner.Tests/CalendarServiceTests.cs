@@ -16,15 +16,10 @@
             var timeService = new Mock<ITimeService>();
             timeService
                 .Setup(s => s.Now)
-                .Returns(new LocalDate(Year, Mount, Day));
+                .Returns(new LocalDate(2019, 12, 25));
 
             _timeService = timeService.Object;
         }
-
-        const int Year = 2019;
-        const int Mount = 12;
-        const int Day = 25;
-        const int MountsDaysNumber = 31;
 
         ITimeService _timeService;
 
@@ -98,7 +93,7 @@
                 .Build()
                 .ToList();
 
-            const int expectedCount = MountsDaysNumber;
+            const int expectedCount = 31;
             Assert.AreEqual(expectedCount, calendar.Count());
 
             const string expected =

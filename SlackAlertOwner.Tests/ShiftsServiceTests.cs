@@ -94,7 +94,7 @@
         }
 
         [Test]
-        public void Should_return_calendar_with_one_patron_day_but_non_in_current_mount()
+        public void Should_return_shifts_calendar_with_one_patron_day_but_non_in_current_mount()
         {
             var patronDay = new PatronDay(new LocalDate(2019, 10, 25), "LA");
 

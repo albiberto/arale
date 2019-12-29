@@ -21,8 +21,7 @@ namespace SlackAlertOwner.Tests
         [Test]
         public void Should_return_correct_date()
         {
-            var today = DateTime.Now;
-            var expected = new LocalDate(today.Year, today.Month, today.Day);
+            var expected = LocalDate.FromDateTime(DateTime.Now);
             
             var actual = _sut.Now;
             

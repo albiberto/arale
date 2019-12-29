@@ -1,5 +1,7 @@
-﻿namespace SlackAlertOwner.Tests
+﻿#nullable enable
+namespace SlackAlertOwner.Tests
 {
+    using Castle.Components.DictionaryAdapter;
     using Google.Apis.Sheets.v4.Data;
     using Microsoft.Extensions.Options;
     using Moq;
@@ -71,8 +73,8 @@
                     }
                 });
 
-            var sut = new AlertOwnerService(_googleSpreadSheetClient.Object, _converter.Object,
-                _timeService.Object, _options);
+            var sut = new AlertOwnerService(_googleSpreadSheetClient.Object, _converter.Object, _timeService.Object, _options);
+            
             var actual = (await sut.GetPatronDays()).First();
 
             Assert.AreEqual(new LocalDate(2019, 12, 25).ToString(), actual.Day.ToString());
@@ -123,19 +125,19 @@
                 .Returns(new LocalDate(2019, 12, 25))
                 .Returns(new LocalDate(2019, 12, 26));
 
-            var sut = new AlertOwnerService(_googleSpreadSheetClient.Object, _converter.Object,
-                _timeService.Object, _options);
-            var actual = await sut.GetShift(teamMates);
+            var sut = new AlertOwnerService(_googleSpreadSheetClient.Object, _converter.Object, _timeService.Object, _options);
+            
+            var (today, tomorrow) = await sut.GetShift(teamMates);
 
-            Assert.AreEqual(new LocalDate(2019, 12, 25).ToString(), actual.today.Schedule.ToString());
-            Assert.AreEqual("1", actual.today.TeamMate.Id);
-            Assert.AreEqual("IronMan", actual.today.TeamMate.Name);
-            Assert.AreEqual(null, actual.today.TeamMate.CountryCode);
+            Assert.AreEqual(new LocalDate(2019, 12, 25).ToString(), today.Schedule.ToString());
+            Assert.AreEqual("1", today.TeamMate.Id);
+            Assert.AreEqual("IronMan", today.TeamMate.Name);
+            Assert.AreEqual(null, today.TeamMate.CountryCode);
 
-            Assert.AreEqual(new LocalDate(2019, 12, 26).ToString(), actual.tomorrow.Schedule.ToString());
-            Assert.AreEqual("2", actual.tomorrow.TeamMate.Id);
-            Assert.AreEqual("Hulk", actual.tomorrow.TeamMate.Name);
-            Assert.AreEqual(null, actual.tomorrow.TeamMate.CountryCode);
+            Assert.AreEqual(new LocalDate(2019, 12, 26).ToString(), tomorrow.Schedule.ToString());
+            Assert.AreEqual("2", tomorrow.TeamMate.Id);
+            Assert.AreEqual("Hulk", tomorrow.TeamMate.Name);
+            Assert.AreEqual(null, tomorrow.TeamMate.CountryCode);
         }
 
         [Test]
@@ -155,13 +157,39 @@
                     }
                 });
 
-            var sut = new AlertOwnerService(_googleSpreadSheetClient.Object, _converter.Object,
-                _timeService.Object, _options);
+            var sut = new AlertOwnerService(_googleSpreadSheetClient.Object, _converter.Object, _timeService.Object, _options);
+            
             var actual = (await sut.GetTeamMates()).ToList().First();
 
             Assert.AreEqual("1", actual.Id);
             Assert.AreEqual("IronMan", actual.Name);
             Assert.AreEqual("LA", actual.CountryCode);
+        }
+
+        [Test]
+        public async Task Should_clear_calendar()
+        {
+            _googleSpreadSheetClient
+                .Setup(s =>
+                    s.Clear(
+                        It.Is<string>(id => id == "1"), 
+                        It.Is<string>(range => range == "Calendar!A:B"),
+                        It.IsAny<ClearValuesRequest>())
+                )
+                .ReturnsAsync(new ClearValuesResponse
+                {
+                    SpreadsheetId = "1"
+                });
+            
+            var sut = new AlertOwnerService(_googleSpreadSheetClient.Object, _converter.Object, _timeService.Object, _options);
+
+            await sut.ClearCalendar();
+
+            _googleSpreadSheetClient.Verify(s => s.Clear(
+                It.Is<string>(id => id == "1"),
+                It.Is<string>(range => range == "Calendar!A:B"),
+                It.IsAny<ClearValuesRequest>()), Times.Once
+            );
         }
     }
 }
