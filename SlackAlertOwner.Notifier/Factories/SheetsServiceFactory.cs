@@ -1,4 +1,4 @@
-﻿namespace SlackAlertOwner.Notifier.Services
+﻿namespace SlackAlertOwner.Notifier.Factories
 {
     using Abstract;
     using Google.Apis.Auth.OAuth2;
@@ -8,16 +8,16 @@
     using Model;
     using System.Security.Cryptography.X509Certificates;
 
-    public class AuthenticationService : IAuthenticationService
+    public class SheetsServiceFactory : ISheetsServiceFactory
     {
         readonly MyOptions _options;
 
-        public AuthenticationService(IOptions<MyOptions> options)
+        public SheetsServiceFactory(IOptions<MyOptions> options)
         {
             _options = options.Value;
         }
 
-        public SheetsService GetService()
+        public SheetsService Build()
         {
             var certificate =
                 new X509Certificate2(_options.Certificate, _options.Password, X509KeyStorageFlags.Exportable);
@@ -27,7 +27,6 @@
                 {
                     Scopes = new[] {SheetsService.Scope.Spreadsheets}
                 }.FromCertificate(certificate));
-
 
             return new SheetsService(new BaseClientService.Initializer
             {

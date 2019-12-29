@@ -1,4 +1,4 @@
-﻿namespace SlackAlertOwner.Notifier.Services
+﻿namespace SlackAlertOwner.Notifier.Clients
 {
     using Abstract;
     using Google.Apis.Sheets.v4;
@@ -9,16 +9,17 @@
 
     public class GoogleSpreadSheetClient : IGoogleSpreadSheetClient
     {
-        readonly SheetsService _service;
+        readonly ISheetsServiceFactory _authServiceFactory;
 
-        public GoogleSpreadSheetClient(IAuthenticationService authService)
+        public GoogleSpreadSheetClient(ISheetsServiceFactory authServiceFactory)
         {
-            _service = authService.GetService();
+            _authServiceFactory = authServiceFactory;
         }
 
         public async Task<ValueRange> Get(string id, string range)
         {
-            var request = _service.Spreadsheets.Values.Get(id, range);
+            using var service = _authServiceFactory.Build();
+            var request = service.Spreadsheets.Values.Get(id, range);
 
             return await request.ExecuteAsync();
         }
@@ -27,7 +28,8 @@
         {
             requestBody ??= new ClearValuesRequest();
 
-            var request = _service.Spreadsheets.Values.Clear(requestBody, id, range);
+            using var service = _authServiceFactory.Build();
+            var request = service.Spreadsheets.Values.Clear(requestBody, id, range);
 
             return await request.ExecuteAsync();
         }
@@ -39,7 +41,9 @@
                 Values = values.Select(Enumerable.ToList).ToList<IList<object>>()
             };
 
-            var request = _service.Spreadsheets.Values.Update(requestBody, id, range);
+            using var service = _authServiceFactory.Build();
+            var request = service.Spreadsheets.Values.Update(requestBody, id, range);
+            
             request.ValueInputOption =
                 (SpreadsheetsResource.ValuesResource.UpdateRequest.ValueInputOptionEnum?) SpreadsheetsResource
                     .ValuesResource.AppendRequest.ValueInputOptionEnum.RAW;

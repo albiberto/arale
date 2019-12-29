@@ -3,6 +3,7 @@
     using Abstract;
     using Clients;
     using Converters;
+    using Factories;
     using Jobs;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
@@ -35,7 +36,7 @@
 
             // services.AddSingleton<NotifyJob>();
             // services.AddSingleton(provider => new JobSchedule(typeof(NotifyJob),
-            //     provider.GetService<IOptions<MyOptions>>().Value.CronExpression));
+            //     provider.Build<IOptions<MyOptions>>().Value.CronExpression));
 
             services.AddSingleton<CalendarJob>();
             services.AddSingleton(provider => new JobSchedule(typeof(CalendarJob),
@@ -54,8 +55,8 @@
         public static void AddEnvironment(this IServiceCollection services)
         {
             services.AddSingleton<ISlackHttpClient, SlackHttpClient>();
-            services.AddSingleton<IAlertOwnerSpreadServiceService, AlertOwnerSpreadSheetService>();
-            services.AddSingleton<IAuthenticationService, AuthenticationService>();
+            services.AddSingleton<IAlertOwnerService, AlertOwnerService>();
+            services.AddSingleton<ISheetsServiceFactory, SheetsServiceFactory>();
             services.AddSingleton<ITypeConverter<LocalDate>, LocalDateConverter>();
             services.AddSingleton<ITimeService, TimeService>();
             services.AddSingleton<IGoogleSpreadSheetClient, GoogleSpreadSheetClient>();
