@@ -32,6 +32,7 @@
                 .ToList();
 
             if (_patronDays.Any()) ApplyPatrons(calendar, _patronDays);
+            
             return calendar;
         }
 
@@ -54,7 +55,7 @@
                 from shift in shifts
                 where shift.Schedule == patron.Day && shift.TeamMate.CountryCode == patron.CountryCode
                 select shift;
-
+            
             while (GetShiftToBeSwitch().Any())
             {
                 var shiftToBeSwitch = GetShiftToBeSwitch().First();
@@ -62,7 +63,7 @@
                 var candidates =
                     shifts.Where(shift => shift.TeamMate.CountryCode != shiftToBeSwitch.TeamMate.CountryCode).ToList();
 
-                var randomTeamMateIndex = _randomIndexService.Random(_calendar.Count());
+                var randomTeamMateIndex = _randomIndexService.Random(candidates.Count());
 
                 var candidateShift = candidates.Skip(randomTeamMateIndex).First();
 
