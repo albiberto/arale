@@ -2,8 +2,9 @@
 {
     using Abstract;
     using Quartz;
-    using Services;
+    using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Threading.Tasks;
 
     [DisallowConcurrentExecution]
@@ -26,6 +27,12 @@
 
         public async Task Execute(IJobExecutionContext context)
         {
+            static string GetRegard()
+            {
+                var regards = new List<string> {"Hola", "Hello", "Ciao"};
+                return regards.ElementAt(new Random().Next(0, regards.Count - 1));
+            }
+
             _logger.Log("Start NotifyJob");
 
             var teamMates = await _alertOwnerService.GetTeamMates();
@@ -33,8 +40,8 @@
 
             var requests = new List<string>
             {
-                MessageService.Today(today.TeamMate),
-                MessageService.Tomorrow(tomorrow.TeamMate)
+                @$"{GetRegard()} <@{today.TeamMate.Id}>. Today is your shift!",
+                @$"{GetRegard()} <@{tomorrow.TeamMate.Id}>. Tomorrow will be your shift!"
             };
 
             await _slackHttpClient.Notify(requests);

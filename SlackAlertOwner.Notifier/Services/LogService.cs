@@ -1,13 +1,14 @@
 ﻿namespace SlackAlertOwner.Notifier.Services
 {
     using Abstract;
+    using Jobs;
     using Microsoft.Extensions.Logging;
 
     public class LogService : ILogService
     {
-        readonly ILogger _logger;
+        readonly ILogger<NotifyJob> _logger;
 
-        public LogService(ILogger logger)
+        public LogService(ILogger<NotifyJob> logger)
         {
             _logger = logger;
         }
