@@ -1,4 +1,4 @@
-﻿namespace SlackAlertOwner.Notifier.Services
+﻿﻿namespace SlackAlertOwner.Notifier.Services
 {
     using Abstract;
     using Model;
@@ -13,9 +13,7 @@
         readonly ICollection<PatronDay> _patronDays;
         readonly ITimeService _timeService;
         readonly IRandomIndexService _randomIndexService;
-
-        public IEnumerable<PatronDay> PatronDays => _patronDays;
-
+        
         public ShiftsService(Func<IEnumerable<LocalDate>> build , ITimeService timeService, IRandomIndexService randomIndexService)
         {
             _timeService = timeService;
@@ -36,6 +34,12 @@
             return calendar;
         }
 
+        public IEnumerable<Shift> Build(IEnumerable<Shift> shifts)
+        {
+            var teamMates = ExtractTeamMatesFromOldCalendar(shifts);
+            return Build(teamMates);
+        }
+
         public ShiftsService AddPatronDay(PatronDay patronDay)
         {
             _patronDays.Add(patronDay);
@@ -47,7 +51,7 @@
             foreach (var patronDay in patronDays) _patronDays.Add(patronDay);
             return this;
         }
-        
+
         void ApplyPatrons(ICollection<Shift> shifts, ICollection<PatronDay> patronDays)
         {
             IEnumerable<Shift> GetShiftToBeSwitch() =>
@@ -75,6 +79,26 @@
                 var secondSwitch = shifts.First(s => s.Schedule == shiftToBeSwitch.Schedule);
                 secondSwitch.TeamMate = temp;
             }
+        }
+
+        static IEnumerable<TeamMate> ExtractTeamMatesFromOldCalendar(IEnumerable<Shift> shifts)
+        {
+            var teamMates = shifts
+                .Reverse()
+                .Select(shift => shift.TeamMate)
+                .ToList();
+            
+            var teamMate = teamMates.First();
+
+            var reordered = teamMates
+                .Skip(1)
+                .TakeWhile(mate => !string.Equals(mate.Id, teamMate.Id, StringComparison.InvariantCulture))
+                .Reverse()
+                .ToList();
+                
+            reordered.Add(teamMate);
+
+            return reordered;
         }
 
         static IEnumerable<T> Forever<T>(IEnumerable<T> source)

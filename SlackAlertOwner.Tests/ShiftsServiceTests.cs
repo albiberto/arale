@@ -135,7 +135,7 @@
             const string expectedCandidateHero = "2";
             const string expectedCandidateCountryCode = "LA";
             var expectedCandidateDay = patronDay.Day;
-            
+
             Assert.AreEqual(expectedCandidateHero, actual.First(a => a.Schedule == expectedCandidateDay).TeamMate.Id);
             Assert.AreEqual(expectedCandidateCountryCode,
                 actual.First(a => a.Schedule == expectedCandidateDay).TeamMate.CountryCode);
@@ -143,7 +143,7 @@
             const string expectedHero = "1";
             var expectedCountryCode = patronDay.CountryCode;
             var expectedDay = patronDay.Day.PlusDays(1);
-            
+
             Assert.AreEqual(expectedHero, actual.First(a => a.Schedule == expectedDay).TeamMate.Id);
             Assert.AreEqual(expectedCountryCode, actual.First(a => a.Schedule == expectedDay).TeamMate.CountryCode);
         }
@@ -175,7 +175,7 @@
             const string expectedCandidateHero = "2";
             const string expectedCandidateCountryCode = "LA";
             var expectedCandidateDay = patronDay1.Day;
-            
+
             Assert.AreEqual(expectedCandidateHero, actual.First(a => a.Schedule == expectedCandidateDay).TeamMate.Id);
             Assert.AreEqual(expectedCandidateCountryCode,
                 actual.First(a => a.Schedule == expectedCandidateDay).TeamMate.CountryCode);
@@ -183,7 +183,7 @@
             const string expectedHero = "1";
             var expectedCountryCode = patronDay1.CountryCode;
             var expectedDay = patronDay1.Day.PlusDays(1);
-            
+
             Assert.AreEqual(expectedHero, actual.First(a => a.Schedule == expectedDay).TeamMate.Id);
             Assert.AreEqual(expectedCountryCode, actual.First(a => a.Schedule == expectedDay).TeamMate.CountryCode);
         }
@@ -254,6 +254,52 @@
                 .ToList();
 
             CheckCompleteCalendar(actual);
+        }
+
+        [Test]
+        public void Should_use_old_calendar()
+        {
+            var sut = new ShiftsService(() => _calendarService.Build(), _timeService.Object, _randomService.Object);
+
+            var calendarOld = new List<Shift>
+            {
+                new Shift(new TeamMate("1", "IronMan", "US"), new LocalDate(2019, 11, 1)),
+                new Shift(new TeamMate("3", "Thor", "AZ"), new LocalDate(2019, 11, 2)),
+                new Shift(new TeamMate("2", "Hulk", "LA"), new LocalDate(2019, 11, 3)),
+                new Shift(new TeamMate("4", "AntMan", "US"), new LocalDate(2019, 11, 4)),
+                new Shift(new TeamMate("1", "IronMan", "US"), new LocalDate(2019, 11, 5)),
+                new Shift(new TeamMate("3", "Thor", "AZ"), new LocalDate(2019, 11, 6)),
+                new Shift(new TeamMate("2", "Hulk", "LA"), new LocalDate(2019, 11, 7)),
+                new Shift(new TeamMate("4", "AntMan", "US"), new LocalDate(2019, 11, 8)),
+                new Shift(new TeamMate("1", "IronMan", "US"), new LocalDate(2019, 11, 9)),
+                new Shift(new TeamMate("3", "Thor", "AZ"), new LocalDate(2019, 11, 10)),
+            };
+
+            var actual = sut
+                .Build(calendarOld)
+                .ToList();
+            
+            var expected = new List<Shift>
+            {
+                new Shift(new TeamMate("2", "Hulk", "LA"), new LocalDate(2019, 12, 1)),
+                new Shift(new TeamMate("4", "AntMan", "US"), new LocalDate(2019, 12, 2)),
+                new Shift(new TeamMate("1", "IronMan", "US"), new LocalDate(2019, 12, 3)),
+                new Shift(new TeamMate("3", "Thor", "AZ"), new LocalDate(2019, 12, 4)),
+                new Shift(new TeamMate("2", "Hulk", "LA"), new LocalDate(2019, 12, 5)),
+                new Shift(new TeamMate("4", "AntMan", "US"), new LocalDate(2019, 12, 6)),
+                new Shift(new TeamMate("1", "IronMan", "US"), new LocalDate(2019, 12, 7)),
+                new Shift(new TeamMate("3", "Thor", "AZ"), new LocalDate(2019, 12, 8)),
+                new Shift(new TeamMate("2", "Hulk", "LA"), new LocalDate(2019, 12, 9))
+            };
+
+            for (var i = 0; i < actual.Count; i++)
+            {
+                var e = expected.Skip(i).First(); 
+                var a = actual.Skip(i).First(); 
+                
+                Assert.AreEqual(e.Schedule, a.Schedule);
+                Assert.AreEqual(e.TeamMate.Id, a.TeamMate.Id);
+            }
         }
     }
 }
