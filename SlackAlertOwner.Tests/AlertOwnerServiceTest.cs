@@ -9,6 +9,7 @@ namespace SlackAlertOwner.Tests
     using Notifier.Model;
     using Notifier.Services;
     using NUnit.Framework;
+    using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
@@ -24,7 +25,7 @@ namespace SlackAlertOwner.Tests
             _googleSpreadSheetClient = _repository.Create<IGoogleSpreadSheetClient>();
             _converter = _repository.Create<ITypeConverter<LocalDate>>();
             _timeService = _repository.Create<ITimeService>();
-            
+
             var options = _repository.Create<IOptions<MyOptions>>();
 
             options
@@ -77,6 +78,46 @@ namespace SlackAlertOwner.Tests
                     It.Is<string>(range => range == "Calendar!A:B"),
                     It.IsAny<ClearValuesRequest>()), Times.Once
             );
+        }
+
+        [Test]
+        public async Task Should_return_calendar()
+        {
+            _googleSpreadSheetClient
+                .Setup(s =>
+                    s.Get(It.Is<string>(id => id == "1"), It.Is<string>(range => range == "Calendar!A:B")))
+                .ReturnsAsync(new ValueRange
+                {
+                    Values = new List<IList<object>>
+                    {
+                        new List<object>
+                        {
+                            "01/12/2019", "IronMan", "LA"
+                        }
+                    }
+                });
+
+            _converter.Setup(s => s
+                .ParseValueFromString(It.Is<string>(str =>
+                    string.Equals(str, "01/12/2019", StringComparison.InvariantCulture))))
+                .Returns(new LocalDate(2019, 12,1));
+
+            var sut = new AlertOwnerService(_googleSpreadSheetClient.Object, _converter.Object, _timeService.Object,
+                _options);
+
+            var actual = (await sut.GetCalendar(new List<TeamMate>
+            {
+                new TeamMate("1", "IronMan", "LA")
+            })).Single();
+
+            var expectedSchedule = new LocalDate(2019, 12, 1);
+            Assert.AreEqual(expectedSchedule, actual.Schedule);
+
+            const string expectedId = "1";
+            Assert.AreEqual(expectedId, actual.TeamMate.Id);
+
+            const string expectedName = "IronMan";
+            Assert.AreEqual(expectedName, actual.TeamMate.Name);
         }
 
         [Test]
