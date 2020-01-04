@@ -32,17 +32,19 @@
 
         public CalendarService WithoutWeekEnd()
         {
-            _conditions.Add(day => day.DayOfWeek != IsoDayOfWeek.Sunday && day.DayOfWeek != IsoDayOfWeek.Saturday);
+            _conditions.Add(day => 
+                day.DayOfWeek != IsoDayOfWeek.Sunday && day.DayOfWeek != IsoDayOfWeek.Saturday);
+            
             return this;
         }
 
         public CalendarService WithoutHolidays()
         {
             var holidays = DateSystem.GetPublicHoliday(_timeService.Now.Year, CountryCode.IT)
-                .Select(publicHoliday => LocalDate.FromDateTime(publicHoliday.Date))
-                .ToHashSet();
+                .Select(publicHoliday => LocalDate.FromDateTime(publicHoliday.Date));
 
-            _conditions.Add(day => !holidays.Contains(day));
+            _conditions.Add(day => 
+                !holidays.Contains(day));
 
             return this;
         }

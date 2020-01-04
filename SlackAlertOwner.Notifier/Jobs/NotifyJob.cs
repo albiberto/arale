@@ -39,14 +39,10 @@
             var (today, tomorrow) = await _alertOwnerService.GetShift(teamMates);
 
             if (today != null)
-            {
                 await _slackHttpClient.Notify(@$"{GetRegard()} <@{today.TeamMate.Id}>. Today is your shift!");
-            }
-            
+
             if (tomorrow != null)
-            {
-                await _slackHttpClient.Notify(@$"{GetRegard()} <@{tomorrow.TeamMate.Id}>. Today is your shift!");
-            }
+                await _slackHttpClient.Notify(@$"{GetRegard()} <@{tomorrow.TeamMate.Id}>. Tomorrow will be your shift!");
 
             _logger.Log("NotifyJob Completed");
         }
