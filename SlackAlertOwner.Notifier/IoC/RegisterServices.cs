@@ -34,9 +34,9 @@
             services.AddSingleton<IJobFactory, SingletonJobFactory>();
             services.AddSingleton<ISchedulerFactory, StdSchedulerFactory>();
 
-            // services.AddSingleton<NotifyJob>();
-            // services.AddSingleton(provider => new JobSchedule(typeof(NotifyJob),
-            //     provider.GetService<IOptions<MyOptions>>().Value.CronExpression));
+            services.AddSingleton<NotifyJob>();
+            services.AddSingleton(provider => new JobSchedule(typeof(NotifyJob),
+                provider.GetService<IOptions<MyOptions>>().Value.CronExpression));
             
             services.AddSingleton<CalendarJob>();
             services.AddSingleton(provider => new JobSchedule(typeof(CalendarJob),

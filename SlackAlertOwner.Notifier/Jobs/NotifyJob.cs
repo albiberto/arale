@@ -29,7 +29,7 @@
         {
             static string GetRegard()
             {
-                var regards = new List<string> {"Hola", "Hello", "Ciao"};
+                var regards = new List<string> {"Hola", "Hello", "Ciao", "Konnichiwa"};
                 return regards.ElementAt(new Random().Next(0, regards.Count - 1));
             }
 
@@ -38,13 +38,15 @@
             var teamMates = await _alertOwnerService.GetTeamMates();
             var (today, tomorrow) = await _alertOwnerService.GetShift(teamMates);
 
-            var requests = new List<string>
+            if (today != null)
             {
-                @$"{GetRegard()} <@{today.TeamMate.Id}>. Today is your shift!",
-                @$"{GetRegard()} <@{tomorrow.TeamMate.Id}>. Tomorrow will be your shift!"
-            };
-
-            await _slackHttpClient.Notify(requests);
+                await _slackHttpClient.Notify(@$"{GetRegard()} <@{today.TeamMate.Id}>. Today is your shift!");
+            }
+            
+            if (tomorrow != null)
+            {
+                await _slackHttpClient.Notify(@$"{GetRegard()} <@{tomorrow.TeamMate.Id}>. Today is your shift!");
+            }
 
             _logger.Log("NotifyJob Completed");
         }
