@@ -22,12 +22,9 @@ namespace SlackAlertOwner.Tests
             _repository = new MockRepository(MockBehavior.Strict) {DefaultValue = DefaultValue.Mock};
 
             _googleSpreadSheetClient = _repository.Create<IGoogleSpreadSheetClient>();
-
             _converter = _repository.Create<ITypeConverter<LocalDate>>();
-
             _timeService = _repository.Create<ITimeService>();
-
-
+            
             var options = _repository.Create<IOptions<MyOptions>>();
 
             options
@@ -98,6 +95,10 @@ namespace SlackAlertOwner.Tests
                         }
                     }
                 });
+
+            _timeService
+                .Setup(s => s.Now)
+                .Returns(new LocalDate(2019, 12, 12));
 
             var sut = new AlertOwnerService(_googleSpreadSheetClient.Object, _converter.Object, _timeService.Object,
                 _options);

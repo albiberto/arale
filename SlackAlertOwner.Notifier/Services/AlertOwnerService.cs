@@ -11,17 +11,17 @@
 
     public class AlertOwnerService : IAlertOwnerService
     {
-        readonly ITypeConverter<LocalDate> _converter;
         readonly IGoogleSpreadSheetClient _googleSpreadSheetClient;
-        readonly MyOptions _options;
+        readonly ITypeConverter<LocalDate> _converter;
         readonly ITimeService _timeService;
+        readonly MyOptions _options;
 
         public AlertOwnerService(IGoogleSpreadSheetClient googleSpreadSheetClient,
             ITypeConverter<LocalDate> converter, ITimeService timeService, IOptions<MyOptions> options)
         {
             _googleSpreadSheetClient = googleSpreadSheetClient;
-            _timeService = timeService;
             _converter = converter;
+            _timeService = timeService;
             _options = options.Value;
         }
 
@@ -45,6 +45,14 @@
 
             return (today, tomorrow);
         }
+        
+        public async Task<IEnumerable<TeamMate>> GetTeamMates() =>
+            from teamMate in (await _googleSpreadSheetClient.Get(_options.SpreadsheetId, _options.TeamMatesRange))
+                .Values
+            let id = teamMate.ElementAt(1) as string
+            let name = teamMate.ElementAt(0) as string
+            let countryCode = teamMate.ElementAt(2) as string
+            select new TeamMate(id, name, countryCode);
 
         public async Task<IEnumerable<PatronDay>> GetPatronDays()
         {
@@ -55,7 +63,7 @@
                 var dayMonth = $"{patronDay.ElementAt(0)}".Split("/");
 
                 return new PatronDay(
-                    new LocalDate(DateTime.Now.Year, Convert.ToInt32(dayMonth.ElementAt(1)),
+                    new LocalDate(_timeService.Now.Year, Convert.ToInt32(dayMonth.ElementAt(1)),
                         Convert.ToInt32(dayMonth.ElementAt(0))),
                     $"{patronDay.ElementAt(1)}"
                 );
@@ -64,13 +72,12 @@
             return result;
         }
 
-        public async Task<IEnumerable<TeamMate>> GetTeamMates() =>
-            from teamMate in (await _googleSpreadSheetClient.Get(_options.SpreadsheetId, _options.TeamMatesRange))
-                .Values
-            let id = teamMate.ElementAt(1) as string
-            let name = teamMate.ElementAt(0) as string
-            let countryCode = teamMate.ElementAt(2) as string
-            select new TeamMate(id, name, countryCode);
+        public async Task<IEnumerable<Shift>> GetCalendar(IEnumerable<TeamMate> teamMates) =>
+            from calendar in (await _googleSpreadSheetClient.Get(_options.SpreadsheetId, _options.CalendarRange)).Values
+            let date = _converter.ParseValueFromString(calendar.ElementAt(0) as string)
+            let mate = teamMates.First(tm =>
+                string.Equals(tm.Name, calendar.ElementAt(1) as string, StringComparison.InvariantCulture))
+            select new Shift(mate, date);
 
         public Task ClearCalendar() =>
             _googleSpreadSheetClient.Clear(_options.SpreadsheetId, _options.CalendarRange);
