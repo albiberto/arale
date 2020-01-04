@@ -1,6 +1,6 @@
-#AlertOwnerService
+# AlertOwnerService
 
-###Info
+### Info
 Il servizio presenta due job che:
 1. notifica sul canale Slack i turni di oggi e domani, taggando il corrispettivo teammate di turno. Esso viene chiamato dal lunedi' al venerdi'.
 2. si preoccupa di scrivere il calendario sullo sheet presente su drive tramite la SheetsAPI, il calendario viene pulito da turni in giorni feriali e nei weekend. Esso viene chiamato ogni primo del mese.
