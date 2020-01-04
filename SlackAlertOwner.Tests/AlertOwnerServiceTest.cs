@@ -1,5 +1,4 @@
-﻿#nullable enable
-namespace SlackAlertOwner.Tests
+﻿namespace SlackAlertOwner.Tests
 {
     using Google.Apis.Sheets.v4.Data;
     using Microsoft.Extensions.Options;
