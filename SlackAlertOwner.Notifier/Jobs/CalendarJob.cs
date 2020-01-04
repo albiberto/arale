@@ -45,13 +45,13 @@
             if (oldCalendar.Any())
             {
                 calendar = shiftService
-                    .Build(teamMates)
+                    .Build(oldCalendar)
                     .ToList();
             }
             else
             {
                 calendar = shiftService
-                    .Build(oldCalendar)
+                    .Build(teamMates)
                     .ToList();
             }
 

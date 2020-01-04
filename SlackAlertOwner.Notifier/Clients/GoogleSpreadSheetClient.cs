@@ -21,7 +21,10 @@
             using var service = _sheetsServiceFactory.Build();
             var request = service.Spreadsheets.Values.Get(id, range);
 
-            return await request.ExecuteAsync();
+            var result = await request.ExecuteAsync();
+            result.Values ??= new List<IList<object>>();
+
+            return result;
         }
 
         public async Task<ClearValuesResponse> Clear(string id, string range, ClearValuesRequest requestBody = default)
@@ -43,7 +46,7 @@
 
             using var service = _sheetsServiceFactory.Build();
             var request = service.Spreadsheets.Values.Update(requestBody, id, range);
-            
+
             request.ValueInputOption =
                 (SpreadsheetsResource.ValuesResource.UpdateRequest.ValueInputOptionEnum?) SpreadsheetsResource
                     .ValuesResource.AppendRequest.ValueInputOptionEnum.RAW;

@@ -34,14 +34,13 @@
             services.AddSingleton<IJobFactory, SingletonJobFactory>();
             services.AddSingleton<ISchedulerFactory, StdSchedulerFactory>();
 
-            services.AddSingleton<NotifyJob>();
-            services.AddSingleton(provider => new JobSchedule(typeof(NotifyJob),
-                provider.GetService<IOptions<MyOptions>>().Value.CronExpression));
-            
-
-            // services.AddSingleton<CalendarJob>();
-            // services.AddSingleton(provider => new JobSchedule(typeof(CalendarJob),
+            // services.AddSingleton<NotifyJob>();
+            // services.AddSingleton(provider => new JobSchedule(typeof(NotifyJob),
             //     provider.GetService<IOptions<MyOptions>>().Value.CronExpression));
+            
+            services.AddSingleton<CalendarJob>();
+            services.AddSingleton(provider => new JobSchedule(typeof(CalendarJob),
+                provider.GetService<IOptions<MyOptions>>().Value.CronExpression));
         }
 
         public static void AddHttpClients(this IServiceCollection services)
