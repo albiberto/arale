@@ -40,13 +40,13 @@
             return Build(teamMates);
         }
 
-        public ShiftsService AddPatronDay(PatronDay patronDay)
+        public IShiftsService AddPatronDay(PatronDay patronDay)
         {
             _patronDays.Add(patronDay);
             return this;
         }
 
-        public ShiftsService AddPatronDays(IEnumerable<PatronDay> patronDays)
+        public IShiftsService AddPatronDays(IEnumerable<PatronDay> patronDays)
         {
             foreach (var patronDay in patronDays) _patronDays.Add(patronDay);
             return this;

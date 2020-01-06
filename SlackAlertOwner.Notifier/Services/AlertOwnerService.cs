@@ -11,10 +11,10 @@
 
     public class AlertOwnerService : IAlertOwnerService
     {
-        readonly IGoogleSpreadSheetClient _googleSpreadSheetClient;
         readonly ITypeConverter<LocalDate> _converter;
-        readonly ITimeService _timeService;
+        readonly IGoogleSpreadSheetClient _googleSpreadSheetClient;
         readonly MyOptions _options;
+        readonly ITimeService _timeService;
 
         public AlertOwnerService(IGoogleSpreadSheetClient googleSpreadSheetClient,
             ITypeConverter<LocalDate> converter, ITimeService timeService, IOptions<MyOptions> options)
@@ -45,7 +45,7 @@
 
             return (today, tomorrow);
         }
-        
+
         public async Task<IEnumerable<TeamMate>> GetTeamMates() =>
             from teamMate in (await _googleSpreadSheetClient.Get(_options.SpreadsheetId, _options.TeamMatesRange))
                 .Values
@@ -82,8 +82,12 @@
         public Task ClearCalendar() =>
             _googleSpreadSheetClient.Clear(_options.SpreadsheetId, _options.CalendarRange);
 
-        public Task WriteCalendar(IEnumerable<IEnumerable<object>> values) =>
-            _googleSpreadSheetClient.Update(_options.SpreadsheetId, _options.CalendarRange,
-                values);
+        public Task WriteCalendar(IEnumerable<Shift> calendar)
+        {
+            var values = calendar.Select(row => new List<object>
+                    {$"{_converter.FormatValueAsString(row.Schedule)}", $"{row.TeamMate.Name}"})
+                .Cast<IEnumerable<object>>();
+            return _googleSpreadSheetClient.Update(_options.SpreadsheetId, _options.CalendarRange, values);
+        }
     }
 }
