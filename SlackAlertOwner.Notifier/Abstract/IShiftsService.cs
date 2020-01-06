@@ -8,7 +8,7 @@
     {
         public IEnumerable<Shift> Build(IEnumerable<TeamMate> teamMates);
         public IEnumerable<Shift> Build(IEnumerable<Shift> teamMates);
-        public ShiftsService AddPatronDay(PatronDay patronDay);
-        public ShiftsService AddPatronDays(IEnumerable<PatronDay> patronDays);
+        public IShiftsService AddPatronDay(PatronDay patronDay);
+        public IShiftsService AddPatronDays(IEnumerable<PatronDay> patronDays);
     }
 }

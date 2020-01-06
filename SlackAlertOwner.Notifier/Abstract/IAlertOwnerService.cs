@@ -10,7 +10,7 @@
         Task<IEnumerable<TeamMate>> GetTeamMates();
         Task<IEnumerable<PatronDay>> GetPatronDays();
         Task<IEnumerable<Shift>> GetCalendar(IEnumerable<TeamMate> teamMates);
-        Task WriteCalendar(IEnumerable<IEnumerable<object>> values);
+        Task WriteCalendar(IEnumerable<Shift> calendar);
         Task ClearCalendar();
     }
 }

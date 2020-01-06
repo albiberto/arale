@@ -97,9 +97,9 @@
                 });
 
             _converter.Setup(s => s
-                .ParseValueFromString(It.Is<string>(str =>
-                    string.Equals(str, "01/12/2019", StringComparison.InvariantCulture))))
-                .Returns(new LocalDate(2019, 12,1));
+                    .ParseValueFromString(It.Is<string>(str =>
+                        string.Equals(str, "01/12/2019", StringComparison.InvariantCulture))))
+                .Returns(new LocalDate(2019, 12, 1));
 
             var sut = new AlertOwnerService(_googleSpreadSheetClient.Object, _converter.Object, _timeService.Object,
                 _options);
@@ -237,16 +237,15 @@
         }
 
         [Test]
-        public async Task Should_update_calendar()
+        public async Task
+            Should_update_calendar()
         {
             _googleSpreadSheetClient
                 .Setup(s =>
                     s.Update(
                         It.Is<string>(id => id == "1"),
                         It.Is<string>(range => range == "Calendar!A:B"),
-                        It.Is<IEnumerable<IEnumerable<object>>>(r =>
-                            string.Join(";", r.First()) == "Hulk;IronMan;Thor;SpiderMan"
-                        ))
+                        It.IsAny<IEnumerable<IEnumerable<object>>>())
                 )
                 .ReturnsAsync(new UpdateValuesResponse
                 {
@@ -256,12 +255,9 @@
             var sut = new AlertOwnerService(_googleSpreadSheetClient.Object, _converter.Object, _timeService.Object,
                 _options);
 
-            var request = new List<IEnumerable<object>>
+            var request = new List<Shift>
             {
-                new List<object>
-                {
-                    "Hulk", "IronMan", "Thor", "SpiderMan"
-                }
+                new Shift(new TeamMate("1", "IronMan", "LA"), new LocalDate(2019, 12, 1))
             };
 
             await sut.WriteCalendar(request);
@@ -269,9 +265,7 @@
             _googleSpreadSheetClient.Verify(s => s.Update(
                     It.Is<string>(id => id == "1"),
                     It.Is<string>(range => range == "Calendar!A:B"),
-                    It.Is<IEnumerable<IEnumerable<object>>>(r =>
-                        string.Join(";", r.First()) == "Hulk;IronMan;Thor;SpiderMan"
-                    )), Times.Once
+                    It.IsAny<IEnumerable<IEnumerable<object>>>()), Times.Once
             );
         }
     }

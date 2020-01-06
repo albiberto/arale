@@ -15,12 +15,12 @@
         readonly IAlertOwnerService _alertOwnerService;
         readonly ITypeConverter<LocalDate> _converter;
         readonly ISlackHttpClient _httpClient;
-        readonly ILogger<NotifyJob> _logger;
+        readonly ILogService _logger;
         readonly IShiftsService _shiftsService;
 
         public CalendarJob(IAlertOwnerService alertOwnerService, ISlackHttpClient httpClient,
             IShiftsService shiftsService, ITypeConverter<LocalDate> converter,
-            ILogger<NotifyJob> logger)
+            ILogService logger)
         {
             _alertOwnerService = alertOwnerService;
             _httpClient = httpClient;
@@ -31,7 +31,7 @@
 
         public async Task Execute(IJobExecutionContext context)
         {
-            _logger.LogInformation("Start CalendarJob");
+            _logger.Log("Start CalendarJob");
 
             var teamMates = (await _alertOwnerService.GetTeamMates()).ToList();
             var oldCalendar = (await _alertOwnerService.GetCalendar(teamMates)).ToList();
@@ -56,17 +56,13 @@
             }
 
             await _alertOwnerService.ClearCalendar();
-            await _alertOwnerService.WriteCalendar(calendar.Select(day => new List<object>
-            {
-                _converter.FormatValueAsString(day.Schedule),
-                $"{day.TeamMate.Name}"
-            }));
-
+            await _alertOwnerService.WriteCalendar(calendar);
+            
             await _httpClient.Notify("Ciao <!channel> e' uscito il nuovo calendario dei turni:");
             await _httpClient.Notify(calendar.Select(shift =>
                 $"{_converter.FormatValueAsString(shift.Schedule)} - {shift.TeamMate.Name}"));
 
-            _logger.LogInformation("CalendarJob Completed");
+            _logger.Log("CalendarJob Completed");
         }
     }
 }

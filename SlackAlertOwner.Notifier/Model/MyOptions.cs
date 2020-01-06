@@ -6,7 +6,8 @@
     {
         public string BaseUrl { get; set; }
         public string EndPoint { get; set; }
-        public string CronExpression { get; set; }
+        public string CalendarJobCronExpression { get; set; }
+        public string NotifyJobCronExpression { get; set; }
         public string SpreadsheetId { get; set; }
         public string CalendarRange { get; set; }
         public string PatronDaysRange { get; set; }

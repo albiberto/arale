@@ -36,11 +36,11 @@
 
             services.AddSingleton<NotifyJob>();
             services.AddSingleton(provider => new JobSchedule(typeof(NotifyJob),
-                provider.GetService<IOptions<MyOptions>>().Value.CronExpression));
+                provider.GetService<IOptions<MyOptions>>().Value.NotifyJobCronExpression));
             
             services.AddSingleton<CalendarJob>();
             services.AddSingleton(provider => new JobSchedule(typeof(CalendarJob),
-                provider.GetService<IOptions<MyOptions>>().Value.CronExpression));
+                provider.GetService<IOptions<MyOptions>>().Value.CalendarJobCronExpression));
         }
 
         public static void AddHttpClients(this IServiceCollection services)
