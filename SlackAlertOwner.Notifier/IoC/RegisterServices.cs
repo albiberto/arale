@@ -23,9 +23,9 @@
         {
             var configBuilder = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json", true);
+                .AddJsonFile("./appsettings.json", true);
             var config = configBuilder.Build();
-
+            
             services.Configure<MyOptions>(config.GetSection("Options"));
         }
 

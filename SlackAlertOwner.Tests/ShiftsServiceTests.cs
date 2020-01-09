@@ -93,6 +93,20 @@
             Assert.AreEqual(expectedCountryCode1, actual.Skip(8).First().TeamMate.CountryCode);
         }
 
+
+        [Test]
+        public void Infinity()
+        {
+            var sut = new ShiftsService(() => _calendarService.Build(), _timeService.Object, new RandomIndexService());
+
+            var actual = sut
+                .AddPatronDay(new PatronDay(new LocalDate(2019, 12, 6), "US"))
+                .AddPatronDay(new PatronDay(new LocalDate(2019, 12, 6), "LA"))
+                .AddPatronDay(new PatronDay(new LocalDate(2019, 12, 6), "AZ"))
+                .Build(_heroMates)
+                .ToList();
+        }
+
         [Test]
         public void Should_return_shifts_calendar_with_one_patron_day_but_non_in_current_mount()
         {
@@ -272,13 +286,13 @@
                 new Shift(new TeamMate("2", "Hulk", "LA"), new LocalDate(2019, 11, 7)),
                 new Shift(new TeamMate("4", "AntMan", "US"), new LocalDate(2019, 11, 8)),
                 new Shift(new TeamMate("1", "IronMan", "US"), new LocalDate(2019, 11, 9)),
-                new Shift(new TeamMate("3", "Thor", "AZ"), new LocalDate(2019, 11, 10)),
+                new Shift(new TeamMate("3", "Thor", "AZ"), new LocalDate(2019, 11, 10))
             };
 
             var actual = sut
                 .Build(calendarOld)
                 .ToList();
-            
+
             var expected = new List<Shift>
             {
                 new Shift(new TeamMate("2", "Hulk", "LA"), new LocalDate(2019, 12, 1)),
@@ -294,9 +308,9 @@
 
             for (var i = 0; i < actual.Count; i++)
             {
-                var e = expected.Skip(i).First(); 
-                var a = actual.Skip(i).First(); 
-                
+                var e = expected.Skip(i).First();
+                var a = actual.Skip(i).First();
+
                 Assert.AreEqual(e.Schedule, a.Schedule);
                 Assert.AreEqual(e.TeamMate.Id, a.TeamMate.Id);
             }
