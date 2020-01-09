@@ -1,4 +1,4 @@
-﻿﻿namespace SlackAlertOwner.Notifier.Services
+﻿namespace SlackAlertOwner.Notifier.Services
 {
     using Abstract;
     using Model;
@@ -11,10 +11,11 @@
     {
         readonly IEnumerable<LocalDate> _calendar;
         readonly ICollection<PatronDay> _patronDays;
-        readonly ITimeService _timeService;
         readonly IRandomIndexService _randomIndexService;
-        
-        public ShiftsService(Func<IEnumerable<LocalDate>> build , ITimeService timeService, IRandomIndexService randomIndexService)
+        readonly ITimeService _timeService;
+
+        public ShiftsService(Func<IEnumerable<LocalDate>> build, ITimeService timeService,
+            IRandomIndexService randomIndexService)
         {
             _timeService = timeService;
             _randomIndexService = randomIndexService;
@@ -25,13 +26,29 @@
 
         public IEnumerable<Shift> Build(IEnumerable<TeamMate> teamMates)
         {
-            var calendar = _calendar.Zip(Forever(teamMates), (day, entity) =>
-                    new Shift(entity, day))
-                .ToList();
+            var leastRecentlyUsed = teamMates.ToList();
 
-            if (_patronDays.Any()) ApplyPatrons(calendar, _patronDays);
-            
-            return calendar;
+            TeamMate GetTeamMate(Predicate<TeamMate> predicate)
+            {
+                var index = leastRecentlyUsed.FindIndex(predicate);
+                if (index == -1) return null;
+
+                var teamMate = leastRecentlyUsed[index];
+                leastRecentlyUsed.RemoveAt(index);
+                leastRecentlyUsed.Add(teamMate);
+
+                return teamMate;
+            }
+
+            bool CanWork(TeamMate mate, LocalDate date) => !_patronDays.Any(patronDay =>
+                patronDay.Day.Month == date.Month && patronDay.Day.Day == date.Day &&
+                patronDay.CountryCode == mate.CountryCode);
+
+            foreach (var day in _calendar)
+            {
+                var teamMate = GetTeamMate(mate => CanWork(mate, day));
+                yield return new Shift(teamMate, day);
+            }
         }
 
         public IEnumerable<Shift> Build(IEnumerable<Shift> shifts)
@@ -59,7 +76,7 @@
                 from shift in shifts
                 where shift.Schedule == patron.Day && shift.TeamMate.CountryCode == patron.CountryCode
                 select shift;
-            
+
             while (GetShiftToBeSwitch().Any())
             {
                 var shiftToBeSwitch = GetShiftToBeSwitch().First();
@@ -87,7 +104,7 @@
                 .Reverse()
                 .Select(shift => shift.TeamMate)
                 .ToList();
-            
+
             var teamMate = teamMates.First();
 
             var reordered = teamMates
@@ -95,7 +112,7 @@
                 .TakeWhile(mate => !string.Equals(mate.Id, teamMate.Id, StringComparison.InvariantCulture))
                 .Reverse()
                 .ToList();
-                
+
             reordered.Add(teamMate);
 
             return reordered;

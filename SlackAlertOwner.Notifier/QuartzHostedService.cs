@@ -1,18 +1,22 @@
 ﻿namespace SlackAlertOwner.Notifier
 {
+    using Abstract;
     using Microsoft.Extensions.Hosting;
     using Quartz;
     using Quartz.Spi;
+    using System;
     using System.Collections.Generic;
+    using System.IO;
+    using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
 
-    public class QuartzHostedService : IHostedService
+    public class QuartzHostedService : BackgroundService
     {
         readonly IJobFactory _jobFactory;
         readonly IEnumerable<JobSchedule> _jobSchedules;
         readonly ISchedulerFactory _schedulerFactory;
-        public IScheduler Scheduler { get; set; }
+        IScheduler Scheduler { get; set; }
 
         public QuartzHostedService(
             ISchedulerFactory schedulerFactory,
@@ -24,7 +28,14 @@
             _jobFactory = jobFactory;
         }
 
-        public async Task StartAsync(CancellationToken cancellationToken)
+        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+        {
+            await RunAsync(stoppingToken);
+            await Task.Delay(-1, stoppingToken);
+            await KillAsync(stoppingToken);
+        }
+
+        async Task RunAsync(CancellationToken cancellationToken)
         {
             Scheduler = await _schedulerFactory.GetScheduler(cancellationToken);
             Scheduler.JobFactory = _jobFactory;
@@ -40,9 +51,9 @@
             await Scheduler.Start(cancellationToken);
         }
 
-        public async Task StopAsync(CancellationToken cancellationToken)
+        async Task KillAsync(CancellationToken cancellationToken)
         {
-            await Scheduler?.Shutdown(cancellationToken);
+            if (Scheduler != null) await Scheduler?.Shutdown(cancellationToken);
         }
 
         static IJobDetail CreateJob(JobSchedule schedule)

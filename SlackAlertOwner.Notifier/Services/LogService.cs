@@ -14,5 +14,6 @@
         }
 
         public void Log(string text) => _logger.LogInformation(text);
+        public void Error(string text) => _logger.LogError(text);
     }
 }
