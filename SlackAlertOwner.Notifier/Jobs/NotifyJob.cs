@@ -1,6 +1,7 @@
 ﻿namespace SlackAlertOwner.Notifier.Jobs
 {
     using Abstract;
+    using Microsoft.Extensions.Logging;
     using Quartz;
     using System;
     using System.Collections.Generic;
@@ -11,13 +12,13 @@
     public class NotifyJob : IJob
     {
         readonly IAlertOwnerService _alertOwnerService;
-        readonly ILogService _logger;
+        readonly ILogger<NotifyJob> _logger;
         readonly ISlackHttpClient _slackHttpClient;
 
         public NotifyJob(
             ISlackHttpClient slackHttpClient,
             IAlertOwnerService alertOwnerService,
-            ILogService logger
+            ILogger<NotifyJob> logger
         )
         {
             _slackHttpClient = slackHttpClient;
@@ -33,7 +34,7 @@
                 return regards.ElementAt(new Random().Next(0, regards.Count - 1));
             }
 
-            _logger.Log("Start NotifyJob");
+            _logger.LogInformation("Start NotifyJob");
 
             try
             {
@@ -49,10 +50,10 @@
             }
             catch (Exception e)
             {
-                _logger.Error(e.ToString());
+                _logger.LogError(e.ToString());
             }
 
-            _logger.Log("NotifyJob Completed");
+            _logger.LogInformation("NotifyJob Completed");
         }
     }
 }
