@@ -64,12 +64,9 @@
             services.AddSingleton<ITimeService, TimeService>();
             services.AddSingleton<IGoogleSpreadSheetClient, GoogleSpreadSheetClient>();
             services.AddSingleton<ICalendarService, CalendarService>();
-            services.AddSingleton<IRandomIndexService, RandomIndexService>();
 
             services.AddSingleton<IShiftsService>(provider => new ShiftsService(
-                () => provider.GetService<ICalendarService>().WithoutHolidays().WithoutWeekEnd().Build(),
-                provider.GetService<ITimeService>(),
-                provider.GetService<IRandomIndexService>()));
+                () => provider.GetService<ICalendarService>().WithoutHolidays().WithoutWeekEnd().Build()));
         }
     }
 }

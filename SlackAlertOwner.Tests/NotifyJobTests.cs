@@ -1,5 +1,6 @@
 ﻿namespace SlackAlertOwner.Tests
 {
+    using Microsoft.Extensions.Logging;
     using Moq;
     using NodaTime;
     using Notifier.Abstract;
@@ -24,8 +25,8 @@
                 .Setup(s => s.GetTeamMates())
                 .ReturnsAsync(_teamMates);
             
-            var logger = _repository.Create<ILogService>();
-            logger.Setup(s => s.Information(It.IsAny<string>()));
+            var logger = _repository.Create<ILogger<NotifyJob>>();
+            logger.Setup(s => s.LogInformation(It.IsAny<string>()));
 
             _logger = logger.Object;
         }
@@ -40,7 +41,7 @@
 
         Mock<ISlackHttpClient> _slackHttpClient;
         Mock<IAlertOwnerService> _alertOwnerService;
-        ILogService _logger;
+        ILogger<NotifyJob> _logger;
 
         readonly IEnumerable<TeamMate> _teamMates = new List<TeamMate>
         {

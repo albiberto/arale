@@ -1,11 +1,11 @@
 ﻿namespace SlackAlertOwner.Tests
 {
+    using Microsoft.Extensions.Logging;
     using Moq;
     using NodaTime;
     using Notifier.Abstract;
     using Notifier.Jobs;
     using Notifier.Model;
-    using Notifier.Services;
     using NUnit.Framework;
     using System.Collections.Generic;
     using System.Threading.Tasks;
@@ -22,9 +22,9 @@
             _alertOwnerService = _repository.Create<IAlertOwnerService>();
             _shiftsService = _repository.Create<IShiftsService>();
 
-            var logger = _repository.Create<ILogService>();
+            var logger = _repository.Create<ILogger<CalendarJob>>();
             logger
-                .Setup(s => s.Information(It.IsAny<string>()));
+                .Setup(s => s.LogInformation(It.IsAny<string>(), It.IsAny<object[]>()));
 
             _logger = logger.Object;
 
@@ -42,7 +42,7 @@
         Mock<IAlertOwnerService> _alertOwnerService;
         Mock<IShiftsService> _shiftsService;
         ITypeConverter<LocalDate> _converter;
-        ILogService _logger;
+        ILogger<CalendarJob> _logger;
 
         MockRepository _repository;
 
@@ -55,7 +55,7 @@
         {
             Hero1, Hero2, Hero3
         };
-        
+
         readonly IEnumerable<PatronDay> _patronDays = new List<PatronDay>
         {
             new PatronDay(new LocalDate(2019, 11, 1), "LA")
@@ -80,7 +80,7 @@
             _alertOwnerService
                 .Setup(s => s.GetCalendar(It.IsAny<IEnumerable<TeamMate>>()))
                 .ReturnsAsync(_calendar);
-            
+
             _alertOwnerService
                 .Setup(s => s.GetPatronDays())
                 .ReturnsAsync(_patronDays);
@@ -103,8 +103,8 @@
 
             _slackHttpClient
                 .Setup(s => s.Notify(It.IsAny<string>()))
-                .Returns(Task.CompletedTask);   
-            
+                .Returns(Task.CompletedTask);
+
             _slackHttpClient
                 .Setup(s => s.Notify(It.IsAny<IEnumerable<string>>()))
                 .Returns(Task.CompletedTask);
@@ -116,7 +116,7 @@
 
             _shiftsService.Verify(s => s.Build(It.IsAny<IEnumerable<TeamMate>>()), Times.Never);
         }
-        
+
         [Test]
         public async Task Should_build_new_calendar()
         {
@@ -127,7 +127,7 @@
             _alertOwnerService
                 .Setup(s => s.GetCalendar(It.IsAny<IEnumerable<TeamMate>>()))
                 .ReturnsAsync(new List<Shift>());
-            
+
             _alertOwnerService
                 .Setup(s => s.GetPatronDays())
                 .ReturnsAsync(_patronDays);
@@ -150,8 +150,8 @@
 
             _slackHttpClient
                 .Setup(s => s.Notify(It.IsAny<string>()))
-                .Returns(Task.CompletedTask);   
-            
+                .Returns(Task.CompletedTask);
+
             _slackHttpClient
                 .Setup(s => s.Notify(It.IsAny<IEnumerable<string>>()))
                 .Returns(Task.CompletedTask);

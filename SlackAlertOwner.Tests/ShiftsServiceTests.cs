@@ -16,10 +16,7 @@
         public void Setup()
         {
             _repository = new MockRepository(MockBehavior.Strict) {DefaultValue = DefaultValue.Mock};
-
-            _timeService = _repository.Create<ITimeService>();
-            _randomService = _repository.Create<IRandomIndexService>();
-
+            
             var calendarService = _repository.Create<ICalendarService>();
 
             calendarService
@@ -47,8 +44,6 @@
         }
 
         MockRepository _repository;
-        Mock<ITimeService> _timeService;
-        Mock<IRandomIndexService> _randomService;
         ICalendarService _calendarService;
 
         readonly IEnumerable<TeamMate> _heroMates = new List<TeamMate>
@@ -97,7 +92,7 @@
         [Test]
         public void Infinity()
         {
-            var sut = new ShiftsService(() => _calendarService.Build(), _timeService.Object, new RandomIndexService());
+            var sut = new ShiftsService(() => _calendarService.Build());
 
             var actual = sut
                 .AddPatronDay(new PatronDay(new LocalDate(2019, 12, 6), "US"))
@@ -111,12 +106,8 @@
         public void Should_return_shifts_calendar_with_one_patron_day_but_non_in_current_mount()
         {
             var patronDay = new PatronDay(new LocalDate(2019, 10, 25), "LA");
-
-            _timeService
-                .Setup(s => s.Now)
-                .Returns(new LocalDate(2019, 12, 25));
-
-            var sut = new ShiftsService(() => _calendarService.Build(), _timeService.Object, _randomService.Object);
+            
+            var sut = new ShiftsService(() => _calendarService.Build());
 
             var actual = sut
                 .AddPatronDay(patronDay)
@@ -130,16 +121,8 @@
         public void Should_return_shifts_calendar_with_one_patron_day_check()
         {
             var patronDay = new PatronDay(new LocalDate(2019, 12, 5), "US");
-
-            _randomService.Setup(s => s
-                    .Random(It.Is<int>(last => last == 4)))
-                .Returns(2);
-
-            _timeService
-                .Setup(s => s.Now)
-                .Returns(patronDay.Day.With(DateAdjusters.StartOfMonth));
-
-            var sut = new ShiftsService(() => _calendarService.Build(), _timeService.Object, _randomService.Object);
+            
+            var sut = new ShiftsService(() => _calendarService.Build());
 
             var actual = sut
                 .AddPatronDay(patronDay)
@@ -168,23 +151,13 @@
             var patronDay1 = new PatronDay(new LocalDate(2019, 12, 5), "US");
             var patronDay2 = new PatronDay(new LocalDate(2019, 12, 6), "LA");
 
-            _randomService.Setup(s =>
-                    s.Random(It.Is<int>(last => last == 4)))
-                .Returns(2);
-
-            _timeService
-                .Setup(s => s.Now)
-                .Returns(patronDay1.Day.With(DateAdjusters.StartOfMonth));
-
-            var sut = new ShiftsService(() => _calendarService.Build(), _timeService.Object, _randomService.Object);
+            var sut = new ShiftsService(() => _calendarService.Build());
 
             var actual = sut
                 .AddPatronDay(patronDay1)
                 .AddPatronDay(patronDay2)
                 .Build(_heroMates)
                 .ToList();
-
-            _randomService.Verify(v => v.Random(4), Times.Once);
 
             const string expectedCandidateHero = "2";
             const string expectedCandidateCountryCode = "LA";
@@ -203,65 +176,9 @@
         }
 
         [Test]
-        public void Should_return_shifts_calendar_with_two_patron_day_check_and_two_step_switch()
-        {
-            var patronDay1 = new PatronDay(new LocalDate(2019, 12, 5), "US");
-            var patronDay2 = new PatronDay(new LocalDate(2019, 12, 6), "LA");
-
-            _randomService.SetupSequence(s =>
-                    s.Random(It.IsAny<int>()))
-                .Returns(0)
-                .Returns(3);
-
-            _timeService
-                .Setup(s => s.Now)
-                .Returns(patronDay1.Day.With(DateAdjusters.StartOfMonth));
-
-            var sut = new ShiftsService(() => _calendarService.Build(), _timeService.Object, _randomService.Object);
-
-            var actual = sut
-                .AddPatronDay(patronDay1)
-                .AddPatronDay(patronDay2)
-                .Build(_heroMates)
-                .ToList();
-
-            _randomService.Verify(v => v.Random(It.IsAny<int>()), Times.Exactly(2));
-
-            const string expectedCandidateHero1 = "2";
-            const string expectedCandidateCountryCode1 = "LA";
-            var expectedCandidateDay1 = patronDay1.Day;
-
-            Assert.AreEqual(expectedCandidateHero1, actual.First(a => a.Schedule == expectedCandidateDay1).TeamMate.Id);
-            Assert.AreEqual(expectedCandidateCountryCode1,
-                actual.First(a => a.Schedule == expectedCandidateDay1).TeamMate.CountryCode);
-
-            const string expectedHero1 = "1";
-            var expectedCountryCode1 = patronDay1.CountryCode;
-            var expectedDay1 = new LocalDate(2019, 12, 2);
-
-            Assert.AreEqual(expectedHero1, actual.First(a => a.Schedule == expectedDay1).TeamMate.Id);
-            Assert.AreEqual(expectedCountryCode1, actual.First(a => a.Schedule == expectedDay1).TeamMate.CountryCode);
-
-            const string expectedCandidateHero2 = "4";
-            const string expectedCandidateCountryCode2 = "US";
-            var expectedCandidateDay2 = patronDay2.Day;
-
-            Assert.AreEqual(expectedCandidateHero2, actual.First(a => a.Schedule == expectedCandidateDay2).TeamMate.Id);
-            Assert.AreEqual(expectedCandidateCountryCode2,
-                actual.First(a => a.Schedule == expectedCandidateDay2).TeamMate.CountryCode);
-
-            const string expectedHero2 = "2";
-            var expectedCountryCode2 = patronDay2.CountryCode;
-            var expectedDay2 = new LocalDate(2019, 12, 4);
-
-            Assert.AreEqual(expectedHero2, actual.First(a => a.Schedule == expectedDay2).TeamMate.Id);
-            Assert.AreEqual(expectedCountryCode2, actual.First(a => a.Schedule == expectedDay2).TeamMate.CountryCode);
-        }
-
-        [Test]
         public void Should_return_shifts_calendar_without_patron_days_check()
         {
-            var sut = new ShiftsService(() => _calendarService.Build(), _timeService.Object, _randomService.Object);
+            var sut = new ShiftsService(() => _calendarService.Build());
 
             var actual = sut
                 .Build(_heroMates)
@@ -273,7 +190,7 @@
         [Test]
         public void Should_use_old_calendar()
         {
-            var sut = new ShiftsService(() => _calendarService.Build(), _timeService.Object, _randomService.Object);
+            var sut = new ShiftsService(() => _calendarService.Build());
 
             var calendarOld = new List<Shift>
             {
