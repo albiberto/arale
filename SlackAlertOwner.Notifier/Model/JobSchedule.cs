@@ -1,4 +1,4 @@
-﻿namespace SlackAlertOwner.Notifier
+﻿namespace SlackAlertOwner.Notifier.Model
 {
     using System;
 
