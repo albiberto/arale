@@ -1,4 +1,4 @@
-﻿namespace SlackAlertOwner.Notifier
+﻿namespace SlackAlertOwner.Notifier.Factories
 {
     using Microsoft.Extensions.DependencyInjection;
     using Quartz;

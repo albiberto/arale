@@ -2,6 +2,7 @@
 {
     using Abstract;
     using Microsoft.Extensions.Hosting;
+    using Model;
     using Quartz;
     using Quartz.Spi;
     using System;
