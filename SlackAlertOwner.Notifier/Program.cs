@@ -1,8 +1,11 @@
 namespace SlackAlertOwner.Notifier
 {
     using IoC;
+    using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
+    using Model;
+    using Serilog;
     using System;
     using System.Collections;
     using System.Diagnostics;
@@ -13,6 +16,11 @@ namespace SlackAlertOwner.Notifier
     {
         public static void Main(string[] args)
         {
+            Log.Logger = new LoggerConfiguration()
+                .Enrich.FromLogContext()
+                .WriteTo.File("./log.txt")
+                .CreateLogger();
+
             if (Debugger.IsAttached || ((IList) args).Contains("--debug"))
             {
                 CreateHostBuilder(args).Build().Run();
@@ -33,11 +41,10 @@ namespace SlackAlertOwner.Notifier
                     services.AddOptionsPattern();
                     services.AddQuartz();
                     services.AddHttpClients();
-
                     services.AddEnvironment();
-
                     services.AddHostedService<QuartzHostedService>();
                 })
+                .UseSerilog()
                 .UseWindowsService();
     }
 }

@@ -24,7 +24,7 @@
 
             var logger = _repository.Create<ILogService>();
             logger
-                .Setup(s => s.Log(It.IsAny<string>()));
+                .Setup(s => s.Information(It.IsAny<string>()));
 
             _logger = logger.Object;
 

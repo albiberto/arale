@@ -22,10 +22,13 @@
         public static void AddOptionsPattern(this IServiceCollection services)
         {
             var configBuilder = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("./appsettings.json", true);
+                .SetBasePath(Directory.GetCurrentDirectory());
+
+            configBuilder.AddJsonFile(true ? "./appsettings.json" : "./appsettings.Development.json",
+                true);
+
             var config = configBuilder.Build();
-            
+
             services.Configure<MyOptions>(config.GetSection("Options"));
         }
 
@@ -37,7 +40,7 @@
             services.AddSingleton<NotifyJob>();
             services.AddSingleton(provider => new JobSchedule(typeof(NotifyJob),
                 provider.GetService<IOptions<MyOptions>>().Value.NotifyJobCronExpression));
-            
+
             services.AddSingleton<CalendarJob>();
             services.AddSingleton(provider => new JobSchedule(typeof(CalendarJob),
                 provider.GetService<IOptions<MyOptions>>().Value.CalendarJobCronExpression));
@@ -62,8 +65,7 @@
             services.AddSingleton<IGoogleSpreadSheetClient, GoogleSpreadSheetClient>();
             services.AddSingleton<ICalendarService, CalendarService>();
             services.AddSingleton<IRandomIndexService, RandomIndexService>();
-            services.AddSingleton<ILogService, LogService>();
-            
+
             services.AddSingleton<IShiftsService>(provider => new ShiftsService(
                 () => provider.GetService<ICalendarService>().WithoutHolidays().WithoutWeekEnd().Build(),
                 provider.GetService<ITimeService>(),

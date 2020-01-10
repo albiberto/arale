@@ -1,9 +1,11 @@
 ﻿namespace SlackAlertOwner.Notifier.Jobs
 {
     using Abstract;
+    using Microsoft.Extensions.Logging;
     using Model;
     using NodaTime;
     using Quartz;
+    using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
@@ -14,12 +16,12 @@
         readonly IAlertOwnerService _alertOwnerService;
         readonly ITypeConverter<LocalDate> _converter;
         readonly ISlackHttpClient _httpClient;
-        readonly ILogService _logger;
+        readonly ILogger<CalendarJob> _logger;
         readonly IShiftsService _shiftsService;
 
         public CalendarJob(IAlertOwnerService alertOwnerService, ISlackHttpClient httpClient,
             IShiftsService shiftsService, ITypeConverter<LocalDate> converter,
-            ILogService logger)
+            ILogger<CalendarJob> logger)
         {
             _alertOwnerService = alertOwnerService;
             _httpClient = httpClient;
@@ -30,34 +32,41 @@
 
         public async Task Execute(IJobExecutionContext context)
         {
-            _logger.Log("Start CalendarJob");
+            _logger.LogInformation("Start CalendarJob");
 
-            var teamMates = (await _alertOwnerService.GetTeamMates()).ToList();
-            var oldCalendar = (await _alertOwnerService.GetCalendar(teamMates)).ToList();
+            try
+            {
+                var teamMates = (await _alertOwnerService.GetTeamMates()).ToList();
+                var oldCalendar = (await _alertOwnerService.GetCalendar(teamMates)).ToList();
 
-            var patronDays = await _alertOwnerService.GetPatronDays();
-            var shiftService = _shiftsService
-                .AddPatronDays(patronDays);
+                var patronDays = await _alertOwnerService.GetPatronDays();
+                var shiftService = _shiftsService
+                    .AddPatronDays(patronDays);
 
-            IEnumerable<Shift> calendar;
+                IEnumerable<Shift> calendar;
 
-            if (oldCalendar.Any())
-                calendar = shiftService
-                    .Build(oldCalendar)
-                    .ToList();
-            else
-                calendar = shiftService
-                    .Build(teamMates)
-                    .ToList();
+                if (oldCalendar.Any())
+                    calendar = shiftService
+                        .Build(oldCalendar)
+                        .ToList();
+                else
+                    calendar = shiftService
+                        .Build(teamMates)
+                        .ToList();
 
-            await _alertOwnerService.ClearCalendar();
-            await _alertOwnerService.WriteCalendar(calendar);
+                await _alertOwnerService.ClearCalendar();
+                await _alertOwnerService.WriteCalendar(calendar);
 
-            await _httpClient.Notify("Ciao <!channel> e' uscito il nuovo calendario dei turni:");
-            await _httpClient.Notify(calendar.Select(shift =>
-                $"{_converter.FormatValueAsString(shift.Schedule)} - {shift.TeamMate.Name}"));
+                await _httpClient.Notify("Ciao <!channel> e' uscito il nuovo calendario dei turni:");
+                await _httpClient.Notify(calendar.Select(shift =>
+                    $"{_converter.FormatValueAsString(shift.Schedule)} - {shift.TeamMate.Name}"));
+            }
+            catch (Exception e)
+            {
+                _logger.LogError($"{e}");
+            }
 
-            _logger.Log("CalendarJob Completed");
+            _logger.LogInformation("CalendarJob Completed");
         }
     }
 }
