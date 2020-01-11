@@ -1,6 +1,7 @@
 ﻿namespace SlackAlertOwner.Notifier.IoC
 {
     using Abstract;
+    using Adapters;
     using Clients;
     using Converters;
     using Factories;
@@ -24,8 +25,9 @@
             var configBuilder = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory());
 
-            configBuilder.AddJsonFile(true ? "./appsettings.json" : "./appsettings.Development.json",
-                true);
+            const string jsonFile = false ? "./appsettings.json" : "./appsettings.Development.json";
+            
+            configBuilder.AddJsonFile(jsonFile, true);
 
             var config = configBuilder.Build();
 
@@ -64,6 +66,7 @@
             services.AddSingleton<ITimeService, TimeService>();
             services.AddSingleton<IGoogleSpreadSheetClient, GoogleSpreadSheetClient>();
             services.AddSingleton<ICalendarService, CalendarService>();
+            services.AddSingleton(typeof(ILoggerAdapter<>), typeof(LoggerAdapter<>));
 
             services.AddSingleton<IShiftsService>(provider => new ShiftsService(
                 () => provider.GetService<ICalendarService>().WithoutHolidays().WithoutWeekEnd().Build()));
