@@ -12,13 +12,13 @@
     public class NotifyJob : IJob
     {
         readonly IAlertOwnerService _alertOwnerService;
-        readonly ILogger<NotifyJob> _logger;
+        readonly ILoggerAdapter<NotifyJob> _logger;
         readonly ISlackHttpClient _slackHttpClient;
 
         public NotifyJob(
             ISlackHttpClient slackHttpClient,
             IAlertOwnerService alertOwnerService,
-            ILogger<NotifyJob> logger
+            ILoggerAdapter<NotifyJob> logger
         )
         {
             _slackHttpClient = slackHttpClient;
@@ -50,7 +50,7 @@
             }
             catch (Exception e)
             {
-                _logger.LogError(e.ToString());
+                _logger.LogError(e, $"{e.Message}");
             }
 
             _logger.LogInformation("NotifyJob Completed");

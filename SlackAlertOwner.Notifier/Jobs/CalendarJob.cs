@@ -16,12 +16,12 @@
         readonly IAlertOwnerService _alertOwnerService;
         readonly ITypeConverter<LocalDate> _converter;
         readonly ISlackHttpClient _httpClient;
-        readonly ILogger<CalendarJob> _logger;
+        readonly ILoggerAdapter<CalendarJob> _logger;
         readonly IShiftsService _shiftsService;
 
         public CalendarJob(IAlertOwnerService alertOwnerService, ISlackHttpClient httpClient,
             IShiftsService shiftsService, ITypeConverter<LocalDate> converter,
-            ILogger<CalendarJob> logger)
+            ILoggerAdapter<CalendarJob> logger)
         {
             _alertOwnerService = alertOwnerService;
             _httpClient = httpClient;
@@ -63,7 +63,7 @@
             }
             catch (Exception e)
             {
-                _logger.LogError($"{e}");
+                _logger.LogError(e, $"{e.Message}");
             }
 
             _logger.LogInformation("CalendarJob Completed");

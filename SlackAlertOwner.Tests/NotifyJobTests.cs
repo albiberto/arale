@@ -25,7 +25,7 @@
                 .Setup(s => s.GetTeamMates())
                 .ReturnsAsync(_teamMates);
             
-            var logger = _repository.Create<ILogger<NotifyJob>>();
+            var logger = _repository.Create<ILoggerAdapter<NotifyJob>>();
             logger.Setup(s => s.LogInformation(It.IsAny<string>()));
 
             _logger = logger.Object;
@@ -41,7 +41,7 @@
 
         Mock<ISlackHttpClient> _slackHttpClient;
         Mock<IAlertOwnerService> _alertOwnerService;
-        ILogger<NotifyJob> _logger;
+        ILoggerAdapter<NotifyJob> _logger;
 
         readonly IEnumerable<TeamMate> _teamMates = new List<TeamMate>
         {

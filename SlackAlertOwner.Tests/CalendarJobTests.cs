@@ -1,6 +1,5 @@
 ﻿namespace SlackAlertOwner.Tests
 {
-    using Microsoft.Extensions.Logging;
     using Moq;
     using NodaTime;
     using Notifier.Abstract;
@@ -22,9 +21,9 @@
             _alertOwnerService = _repository.Create<IAlertOwnerService>();
             _shiftsService = _repository.Create<IShiftsService>();
 
-            var logger = _repository.Create<ILogger<CalendarJob>>();
+            var logger = _repository.Create<ILoggerAdapter<CalendarJob>>();
             logger
-                .Setup(s => s.LogInformation(It.IsAny<string>(), It.IsAny<object[]>()));
+                .Setup(s => s.LogInformation(It.IsAny<string>()));
 
             _logger = logger.Object;
 
@@ -42,7 +41,7 @@
         Mock<IAlertOwnerService> _alertOwnerService;
         Mock<IShiftsService> _shiftsService;
         ITypeConverter<LocalDate> _converter;
-        ILogger<CalendarJob> _logger;
+        ILoggerAdapter<CalendarJob> _logger;
 
         MockRepository _repository;
 
