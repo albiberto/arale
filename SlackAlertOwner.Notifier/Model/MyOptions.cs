@@ -1,7 +1,5 @@
 ﻿namespace SlackAlertOwner.Notifier.Model
 {
-    using System.Collections.Generic;
-
     public class MyOptions
     {
         public string BaseUrl { get; set; }
@@ -17,7 +15,5 @@
         public string Certificate { get; set; }
         public string Password { get; set; }
         public string ServiceAccountEmail { get; set; }
-        
-        public IEnumerable<TeamMate> TeamMates { get; set; }
     }
 }

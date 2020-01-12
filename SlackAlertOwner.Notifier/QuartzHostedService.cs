@@ -5,10 +5,7 @@
     using Model;
     using Quartz;
     using Quartz.Spi;
-    using System;
     using System.Collections.Generic;
-    using System.IO;
-    using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
 
@@ -16,24 +13,31 @@
     {
         readonly IJobFactory _jobFactory;
         readonly IEnumerable<JobSchedule> _jobSchedules;
+        readonly ILoggerAdapter<QuartzHostedService> _logger;
         readonly ISchedulerFactory _schedulerFactory;
         IScheduler Scheduler { get; set; }
 
         public QuartzHostedService(
             ISchedulerFactory schedulerFactory,
             IJobFactory jobFactory,
-            IEnumerable<JobSchedule> jobSchedules)
+            IEnumerable<JobSchedule> jobSchedules,
+            ILoggerAdapter<QuartzHostedService> logger)
         {
             _schedulerFactory = schedulerFactory;
             _jobSchedules = jobSchedules;
+            _logger = logger;
             _jobFactory = jobFactory;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
+            _logger.LogInformation("QuartzHostedService Start");
+
             await RunAsync(stoppingToken);
             await Task.Delay(-1, stoppingToken);
             await KillAsync(stoppingToken);
+
+            _logger.LogInformation("QuartzHostedService Shutdown");
         }
 
         async Task RunAsync(CancellationToken cancellationToken)
