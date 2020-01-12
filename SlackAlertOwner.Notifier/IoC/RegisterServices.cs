@@ -16,22 +16,13 @@
     using Quartz.Spi;
     using Services;
     using System;
-    using System.IO;
 
     public static class RegisterServices
     {
-        public static void AddOptionsPattern(this IServiceCollection services)
+        public static void AddOptionsPattern(this IServiceCollection services, IConfigurationBuilder builder)
         {
-            var configBuilder = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory());
-
-            const string jsonFile = false ? "./appsettings.json" : "./appsettings.Development.json";
-            
-            configBuilder.AddJsonFile(jsonFile, true);
-
-            var config = configBuilder.Build();
-
-            services.Configure<MyOptions>(config.GetSection("Options"));
+            var config = builder.Build();
+            services.Configure<MyOptions>(config);
         }
 
         public static void AddQuartz(this IServiceCollection services)
