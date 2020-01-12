@@ -71,12 +71,25 @@
                 .Build();
         }
 
-        static ITrigger CreateTrigger(JobSchedule schedule) =>
-            TriggerBuilder
+        static ITrigger CreateTrigger(JobSchedule schedule)
+        {
+            var trigger = TriggerBuilder
                 .Create()
-                .WithIdentity($"{schedule.JobType.FullName}.trigger")
+                .WithIdentity($"{schedule.JobType.FullName}.trigger");
+                
+            
+            if (string.IsNullOrEmpty(schedule.CronExpression))
+            {
+                return trigger
+                    .StartNow()
+                    .WithDescription("Run Once")
+                    .Build();
+            }
+
+            return trigger
                 .WithCronSchedule(schedule.CronExpression)
                 .WithDescription(schedule.CronExpression)
                 .Build();
+        }
     }
 }

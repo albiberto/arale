@@ -1,7 +1,6 @@
 ﻿namespace SlackAlertOwner.Notifier.Jobs
 {
     using Abstract;
-    using Microsoft.Extensions.Logging;
     using Quartz;
     using System;
     using System.Collections.Generic;

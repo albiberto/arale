@@ -1,0 +1,26 @@
+2020-01-12 19:35:38.282 +01:00 [INF] QuartzHostedService Start
+2020-01-12 19:35:38.541 +01:00 [INF] Default Quartz.NET properties loaded from embedded resource file
+2020-01-12 19:35:38.628 +01:00 [INF] Initialized Scheduler Signaller of type: Quartz.Core.SchedulerSignalerImpl
+2020-01-12 19:35:38.640 +01:00 [INF] Quartz Scheduler v.3.0.7.0 created.
+2020-01-12 19:35:38.643 +01:00 [INF] RAMJobStore initialized.
+2020-01-12 19:35:38.647 +01:00 [INF] Scheduler meta-data: Quartz Scheduler (v3.0.7.0) 'DefaultQuartzScheduler' with instanceId 'NON_CLUSTERED'
+  Scheduler class: 'Quartz.Core.QuartzScheduler' - running locally.
+  NOT STARTED.
+  Currently in standby mode.
+  Number of jobs executed: 0
+  Using thread pool 'Quartz.Simpl.DefaultThreadPool' - with 10 threads.
+  Using job-store 'Quartz.Simpl.RAMJobStore' - which does not support persistence. and is not clustered.
+
+2020-01-12 19:35:38.647 +01:00 [INF] Quartz scheduler 'DefaultQuartzScheduler' initialized
+2020-01-12 19:35:38.647 +01:00 [INF] Quartz scheduler version: 3.0.7.0
+2020-01-12 19:35:38.648 +01:00 [INF] JobFactory set to: SlackAlertOwner.Notifier.Factories.SingletonJobFactory
+2020-01-12 19:35:51.296 +01:00 [INF] Scheduler DefaultQuartzScheduler_$_NON_CLUSTERED started.
+2020-01-12 19:35:51.299 +01:00 [INF] Application started. Press Ctrl+C to shut down.
+2020-01-12 19:35:51.300 +01:00 [INF] Hosting environment: Development
+2020-01-12 19:35:51.300 +01:00 [INF] Content root path: C:\Users\aviez\Projects\SlackAlertOwnerService\SlackAlertOwner.Notifier
+2020-01-12 19:35:51.336 +01:00 [INF] Start WelcomeJob
+2020-01-12 19:35:55.264 +01:00 [INF] Start processing HTTP request POST "https://hooks.slack.com/services/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"
+2020-01-12 19:35:55.269 +01:00 [INF] Sending HTTP request POST "https://hooks.slack.com/services/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"
+2020-01-12 19:35:55.792 +01:00 [INF] Received HTTP response after 521.2156ms - "OK"
+2020-01-12 19:35:55.794 +01:00 [INF] End processing HTTP request after 537.5165ms - "OK"
+2020-01-12 19:35:55.799 +01:00 [INF] WelcomeJob Completed
