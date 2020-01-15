@@ -30,13 +30,13 @@
             services.AddSingleton<IJobFactory, SingletonJobFactory>();
             services.AddSingleton<ISchedulerFactory, StdSchedulerFactory>();
 
-            // services.AddSingleton<NotifyJob>();
-            // services.AddSingleton(provider => new JobSchedule(typeof(NotifyJob),
-            //     provider.GetService<IOptions<MyOptions>>().Value.NotifyJobCronExpression));
-            //
-            // services.AddSingleton<CalendarJob>();
-            // services.AddSingleton(provider => new JobSchedule(typeof(CalendarJob),
-            //     provider.GetService<IOptions<MyOptions>>().Value.CalendarJobCronExpression));
+            services.AddSingleton<NotifyJob>();
+            services.AddSingleton(provider => new JobSchedule(typeof(NotifyJob),
+                provider.GetService<IOptions<MyOptions>>().Value.NotifyJobCronExpression));
+            
+            services.AddSingleton<CalendarJob>();
+            services.AddSingleton(provider => new JobSchedule(typeof(CalendarJob),
+                provider.GetService<IOptions<MyOptions>>().Value.CalendarJobCronExpression));
             
             services.AddSingleton<WelcomeJob>();
             services.AddSingleton(provider => new JobSchedule(typeof(WelcomeJob),null));
