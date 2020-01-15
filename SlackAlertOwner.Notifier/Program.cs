@@ -4,7 +4,6 @@ namespace SlackAlertOwner.Notifier
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
-    using Model;
     using Serilog;
     using System;
     using System.Collections;
@@ -40,10 +39,10 @@ namespace SlackAlertOwner.Notifier
                 {
                     var builder = new ConfigurationBuilder()
                         .SetBasePath(hostContext.HostingEnvironment.ContentRootPath)
-                        .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-                        .AddJsonFile($"appsettings.{hostContext.HostingEnvironment.EnvironmentName}.json", optional: true)
+                        .AddJsonFile("appsettings.json", false, true)
+                        .AddJsonFile($"appsettings.{hostContext.HostingEnvironment.EnvironmentName}.json", true)
                         .AddEnvironmentVariables();
-                    
+
                     services.AddOptionsPattern(builder);
                     services.AddQuartz();
                     services.AddHttpClients();

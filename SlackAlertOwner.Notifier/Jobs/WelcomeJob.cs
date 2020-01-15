@@ -27,7 +27,7 @@
             try
             {
                 await _client.Notify(
-                    $@"Hi <!channel>. I'm {_options.ApplicationName}, I'm here to help you managing your shifts!");
+                    $@"Hi <!channel>. I'm {_options.ApplicationName}, I am your shifts managing assistant!");
             }
             catch (Exception e)
             {

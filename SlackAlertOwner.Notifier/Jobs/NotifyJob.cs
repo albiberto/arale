@@ -45,7 +45,7 @@
 
                 if (tomorrow != null)
                     await _slackHttpClient.Notify(
-                        @$"{GetRegard()} <@ {tomorrow.TeamMate.Id}>. Tomorrow will be your shift!");
+                        @$"{GetRegard()} <@{tomorrow.TeamMate.Id}>. Tomorrow will be your shift!");
             }
             catch (Exception e)
             {
