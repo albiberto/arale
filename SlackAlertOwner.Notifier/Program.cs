@@ -49,7 +49,6 @@ namespace SlackAlertOwner.Notifier
                     services.AddEnvironment();
                     services.AddHostedService<QuartzHostedService>();
                 })
-                .UseSerilog()
-                .UseWindowsService();
+                .UseSerilog();
     }
 }
