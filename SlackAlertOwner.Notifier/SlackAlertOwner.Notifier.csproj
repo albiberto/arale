@@ -21,7 +21,9 @@
 
   <ItemGroup>
     <None Remove="certificate.p12" />
-    <Content Include="certificate.p12" />
+    <Content Include="certificate.p12">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   
 </Project>

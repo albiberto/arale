@@ -1,4 +1,10 @@
-﻿param($Env)
+﻿$ENV = $args[0]
+
+if (([string]::IsNullOrEmpty($ENV))) {
+    $ENV = "Development"
+}
+
+Write-Output "ENV: $ENV"
 
 $folder=".\bin\dist-docker-image"
 
@@ -20,12 +26,12 @@ Write-Output "Build completed."
 
 # Remove and Build Docker Image.
 docker rmi -f arale
-docker build -t arale --build-arg ENV=$Env .
+docker build -t arale .
+
 Write-Output "Docker image builded"
 
 # Remove and Install Docker Container.
 docker rm -f araleservice
-docker run -t --name araleservice arale
+docker run -e "ENV=$ENV" -ti --name araleservice arale
 
 Write-Output "Arale started."
-
