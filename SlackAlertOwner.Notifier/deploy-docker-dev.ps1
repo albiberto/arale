@@ -1,0 +1,1 @@
+﻿& ./deploy-docker.ps1

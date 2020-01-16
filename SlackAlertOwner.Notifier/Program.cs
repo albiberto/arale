@@ -17,7 +17,7 @@ namespace SlackAlertOwner.Notifier
         {
             Log.Logger = new LoggerConfiguration()
                 .Enrich.FromLogContext()
-                .WriteTo.File("./log.log")
+                .WriteTo.Console()
                 .CreateLogger();
 
             if (Debugger.IsAttached || ((IList) args).Contains("--debug"))
