@@ -4,4 +4,4 @@ WORKDIR /app
 
 COPY ./bin/dist-docker-image/ .
 
-ENTRYPOINT dotnet SlackAlertOwner.Notifier.dll --environment "$ENV"
+ENTRYPOINT dotnet SlackAlertOwner.Notifier.dll --environment "$ENV" --endPoint "$EndPoint" --baseUrl "$BaseUrl" --spreadsheetId "$SpreadSheetId" --pattern "$Pattern" --serviceAccountEmail "$ServiceAccountEmail" --certificate "$Certificate" --password "$Password"
