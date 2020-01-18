@@ -3,6 +3,10 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26124.0
 MinimumVisualStudioVersion = 15.0.26124.0
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SlackAlertOwner.Notifier", "src\SlackAlertOwner.Notifier\SlackAlertOwner.Notifier.csproj", "{9C2643F9-C4AB-418A-8A3F-246BD0301350}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SlackAlertOwner.Tests", "src\SlackAlertOwner.Tests\SlackAlertOwner.Tests.csproj", "{E864F3C4-5468-4D55-B5C4-75A26EE1EC95}"
+EndProject
 Global
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
