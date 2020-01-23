@@ -40,8 +40,8 @@ namespace SlackAlertOwner.Notifier
                     var builder = new ConfigurationBuilder()
                         .SetBasePath(hostContext.HostingEnvironment.ContentRootPath)
                         .AddCommandLine(args)
-                        .AddJsonFile("appsettings.json", false, true)
-                        .AddEnvironmentVariables();
+                        .AddEnvironmentVariables()
+                        .AddJsonFile("appsettings.json", false, true);
 
                     services.AddOptionsPattern(builder);
                     services.AddQuartz();
