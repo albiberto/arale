@@ -2,7 +2,8 @@ FROM mcr.microsoft.com/dotnet/core/sdk:3.1 AS build
 WORKDIR /app
 
 COPY *.sln ./
-COPY ./src/SlackAlertOwner.Notifier/*.csproj ./src/SlackAlertOwner.Notifier
+COPY ./src/SlackAlertOwner.Notifier/*.csproj ./src/SlackAlertOwner.Notifier/
+COPY ./src/SlackAlertOwner.Tests/*.csproj ./src/SlackAlertOwner.Tests/
 
 RUN dotnet restore
 
