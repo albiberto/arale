@@ -1,7 +1,11 @@
 FROM mcr.microsoft.com/dotnet/core/sdk:3.1 AS build
 WORKDIR /app
 
-COPY *.csproj .
+COPY *.sln ./
+COPY */*.cspro ./
+RUN find *.cspro | sed -e 's/.cspro//g' | xargs mkdir
+RUN find *.cspro | sed -r -e 's/((.+).cspro)/.\/\1 .\/\2/g' | xargs -I % sh -c 'mv %'
+
 RUN dotnet restore
 
 COPY ./src/SlackAlertOwner.Notifier .
