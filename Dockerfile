@@ -2,13 +2,12 @@ FROM mcr.microsoft.com/dotnet/core/sdk:3.1 AS build
 WORKDIR /app
 
 COPY *.sln ./
-COPY */*.csproj ./
-RUN find *.csproj | sed -e 's/.cspro//g' | xargs mkdir
-RUN find *.csproj | sed -r -e 's/((.+).csproj)/.\/\1 .\/\2/g' | xargs -I % sh -c 'mv %'
+COPY ./src/SlackAlertOwner.Notifier/*.csproj ./src/SlackAlertOwner.Notifier
 
 RUN dotnet restore
 
 COPY ./src/SlackAlertOwner.Notifier .
+
 RUN dotnet publish -c release -o /dist --no-restore
 
 # final stage/image
