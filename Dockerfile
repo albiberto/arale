@@ -1,15 +1,16 @@
 FROM mcr.microsoft.com/dotnet/core/sdk:3.1 AS build
-WORKDIR /app
+WORKDIR /source
 
-COPY *.sln ./
-COPY ./src/SlackAlertOwner.Notifier/*.csproj ./src/SlackAlertOwner.Notifier/
-COPY ./src/SlackAlertOwner.Tests/*.csproj ./src/SlackAlertOwner.Tests/
+COPY src/SlackAlertOwner.Notifier/*.csproj SlackAlertOwner.Notifier/
 
-RUN dotnet restore
+RUN dotnet restore SlackAlertOwner.Notifier/SlackAlertOwner.Notifier.csproj
 
-COPY ./src/SlackAlertOwner.Notifier .
+COPY src/SlackAlertOwner.Notifier/ SlackAlertOwner.Notifier/
 
-RUN dotnet publish -c release -o /dist --no-restore
+WORKDIR /source/SlackAlertOwner.Notifier
+
+RUN dotnet build -c release --no-restore
+RUN dotnet publish -c release --no-build -o /app
 
 # final stage/image
 FROM mcr.microsoft.com/dotnet/core/runtime:3.1
