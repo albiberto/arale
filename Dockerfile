@@ -16,4 +16,13 @@ RUN dotnet publish -c release --no-build -o /app
 FROM mcr.microsoft.com/dotnet/core/runtime:3.1
 WORKDIR /app
 COPY --from=build /app .
-ENTRYPOINT dotnet SlackAlertOwner.Notifier.dll --environment "$ENV" --endPoint "$EndPoint" --baseUrl "$BaseUrl" --spreadsheetId "$SpreadSheetId" --pattern "$Pattern" --serviceAccountEmail "$ServiceAccountEmail" --certificate "$Certificate" --password "$Password"
+ENTRYPOINT dotnet SlackAlertOwner.Notifier.dll \
+--endPoint "$EndPoint" \
+--baseUrl "$BaseUrl" \
+--spreadsheetId "$SpreadSheetId" \
+--pattern "$Pattern" \
+--serviceAccountEmail "$ServiceAccountEmail" \
+--certificate "$Certificate" \
+--password "$Password" \
+--calendarJobCronExpression "$CalendarJobCronExpression" \
+--notifyJobCronExpression "$NotifyJobCronExpression"
