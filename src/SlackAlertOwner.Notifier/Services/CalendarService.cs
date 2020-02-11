@@ -19,7 +19,7 @@
 
         public IEnumerable<LocalDate> Build()
         {
-            var day = _timeService.Now.With(DateAdjusters.StartOfMonth);
+            var day = ChooseMonth();
 
             var monthDaysNumber = DateTime.DaysInMonth(day.Year, day.Month);
 
@@ -47,6 +47,30 @@
                 !holidays.Contains(day));
 
             return this;
+        }
+
+        public LocalDate ChooseMonth()
+        {
+
+            LocalDate lastWorkingDayOfMonth = _timeService.Now.With(DateAdjusters.EndOfMonth);
+
+            if (_timeService.Now.Equals(lastWorkingDayOfMonth))
+            {
+                return _timeService.NextMonth.With(DateAdjusters.StartOfMonth);
+            }
+
+            while (lastWorkingDayOfMonth.DayOfWeek.Equals(NodaTime.IsoDayOfWeek.Saturday) ||
+                    lastWorkingDayOfMonth.DayOfWeek.Equals(NodaTime.IsoDayOfWeek.Sunday))
+            {
+                lastWorkingDayOfMonth = lastWorkingDayOfMonth.Minus(Period.FromDays(1));
+            }
+
+            if (_timeService.Now.Equals(lastWorkingDayOfMonth))
+            {
+                return _timeService.NextMonth.With(DateAdjusters.StartOfMonth);
+            }
+
+            return _timeService.Now.With(DateAdjusters.StartOfMonth);
         }
     }
 }
