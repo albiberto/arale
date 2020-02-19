@@ -5,5 +5,7 @@
     public interface ITimeService
     {
         LocalDate Now { get; }
+
+        LocalDate NextMonth { get; }
     }
 }

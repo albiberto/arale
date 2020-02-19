@@ -19,7 +19,7 @@
 
         public IEnumerable<LocalDate> Build()
         {
-            var day = _timeService.Now.With(DateAdjusters.StartOfMonth);
+            var day = _timeService.NextMonth.With(DateAdjusters.StartOfMonth);
 
             var monthDaysNumber = DateTime.DaysInMonth(day.Year, day.Month);
 
@@ -48,5 +48,6 @@
 
             return this;
         }
+
     }
 }
