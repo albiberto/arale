@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/core/sdk:3.1 AS build
+FROM mcr.microsoft.com/dotnet/core/sdk:5.0.100-preview-alpine3.11 AS build
 WORKDIR /source
 
 COPY src/SlackAlertOwner.Notifier/*.csproj SlackAlertOwner.Notifier/
@@ -13,7 +13,7 @@ RUN dotnet build -c release --no-restore
 RUN dotnet publish -c release --no-build -o /app
 
 # final stage/image
-FROM mcr.microsoft.com/dotnet/core/runtime:3.1
+FROM mcr.microsoft.com/dotnet/core/runtime:5.0.0-preview-alpine3.11
 WORKDIR /app
 COPY --from=build /app .
 ENTRYPOINT dotnet SlackAlertOwner.Notifier.dll \

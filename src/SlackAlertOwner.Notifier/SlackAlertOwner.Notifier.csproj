@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Worker">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>netcoreapp5.0</TargetFramework>
     <UserSecretsId>dotnet-SlackAlertOwner.Notifier-AD689C90-8182-4736-AE26-249F7983D8E2</UserSecretsId>
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
