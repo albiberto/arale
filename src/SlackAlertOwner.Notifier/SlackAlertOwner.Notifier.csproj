@@ -7,16 +7,17 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Google.Apis" Version="1.42.0" />
-    <PackageReference Include="Google.Apis.Auth.AspNetCore" Version="1.42.0" />
-    <PackageReference Include="Google.Apis.Drive.v3" Version="1.42.0.1778" />
-    <PackageReference Include="Google.Apis.Sheets.v4" Version="1.42.0.1791" />
-    <PackageReference Include="Google.Cloud.Storage.V1" Version="2.4.0" />
-    <PackageReference Include="Microsoft.Extensions.Hosting" Version="3.1.0" />
-    <PackageReference Include="Microsoft.Extensions.Http" Version="3.1.0" />
-    <PackageReference Include="Nager.Date" Version="1.25.8" />
+    <PackageReference Include="Google.Apis" Version="1.44.1" />
+    <PackageReference Include="Google.Apis.Auth.AspNetCore" Version="1.44.1" />
+    <PackageReference Include="Google.Apis.Drive.v3" Version="1.44.1.1888" />
+    <PackageReference Include="Google.Apis.Sheets.v4" Version="1.44.1.1895" />
+    <PackageReference Include="Google.Cloud.Storage.V1" Version="3.0.0-beta02" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="5.0.0-preview.1.20120.4" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="5.0.0-preview.1.20120.4" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="5.0.0-preview.1.20120.4" />
+    <PackageReference Include="Nager.Date" Version="1.25.10" />
     <PackageReference Include="NodaTime" Version="3.0.0-beta01" />
     <PackageReference Include="Quartz" Version="3.0.7" />
-    <PackageReference Include="Serilog.AspNetCore" Version="3.2.0" />
+    <PackageReference Include="Serilog.AspNetCore" Version="3.3.0-dev-00152" />
   </ItemGroup>
 </Project>

@@ -26,8 +26,7 @@ namespace SlackAlertOwner.Notifier
             }
             else
             {
-                var path = Path.GetDirectoryName(Assembly.GetEntryAssembly()?.Location ??
-                                                 throw new Exception("Cannot resolve service location."));
+                var path = Path.GetDirectoryName(Assembly.GetEntryAssembly()?.Location ?? throw new Exception("Cannot resolve service location."));
                 Directory.SetCurrentDirectory(path);
                 CreateHostBuilder(args).Build().Run();
             }
@@ -50,5 +49,7 @@ namespace SlackAlertOwner.Notifier
                     services.AddHostedService<QuartzHostedService>();
                 })
                 .UseSerilog();
+
+        // .UseWindowsService();
     }
 }
